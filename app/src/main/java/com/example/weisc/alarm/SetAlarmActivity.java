@@ -109,8 +109,8 @@ public class SetAlarmActivity extends AppCompatActivity implements AdapterView.O
                 Intent intent = new Intent();
                 int hour = timePicker.getCurrentHour();
                 int minute = timePicker.getCurrentMinute();
-
-                Alarm alarm = new Alarm(hour, minute, repeatDate, true, ringtone, null);
+                String ringtoneStr = ringtone == null ? "null" : ringtone.toString();
+                Alarm alarm = new Alarm(hour, minute, repeatDate, true, ringtoneStr, null);
                 intent.putExtra(ALARM_DATA, alarm);
                 setResult(RESULT_OK, intent);
                 saveAlarm(alarm);

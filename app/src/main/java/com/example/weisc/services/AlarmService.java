@@ -25,26 +25,28 @@ public class AlarmService extends Service {
     public class AlarmServiceBinder extends Binder {
         public void setAlarm(Alarm alarm) {
             String key = alarm.getAlarmName();
+            Log.d("TEST", "setAlarm: ");
             if (alarms.containsKey(key)) {
-//                Intent intent = alarms.get(key);
                 Log.d("TEST", "setAlarm: status change");
             } else {
-                Intent intent = new Intent("com.weisc.alarm");
-                intent.putExtra("ringtone_uri", alarm.getRingtone());
-                PendingIntent operator = PendingIntent.
-                        getBroadcast(AlarmService.this, 0, intent, 0);
-                int interval = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
-                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 2000, operator);
-                Log.d("TEST", "setAlarm: set alarm");
-                alarms.put(key, operator);
+                Log.d("TEST", "setAlarm: " + calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate()));
+//                Intent intent = new Intent("com.weisc.alarm");
+//                intent.putExtra("ringtone_uri", alarm.getRingtone());
+//                PendingIntent operator = PendingIntent.
+//                        getBroadcast(AlarmService.this, 0, intent, 0);
+//                int interval = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
+//                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 2000, operator);
+//                Log.d("TEST", "setAlarm: set alarm");
+//                alarms.put(key, operator);
             }
         }
     }
 
-    private int calculate(int hour, int minute, int repeatDate) {
-        Calendar calendar=Calendar.getInstance();
-//        calendar.
-        return 0;
+    private long calculate(int hour, int minute, int repeatDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        return calendar.getTimeInMillis()-System.currentTimeMillis();
     }
 
     @Override

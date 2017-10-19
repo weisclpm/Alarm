@@ -33,9 +33,9 @@ public class Alarm implements Serializable {
     private String timeText;
     private String repeatText;
     private String alarmName;
-    private Uri ringtone;
+    private String ringtone;
 
-    public Alarm(int hour, int minute, int repeatDate, boolean status, Uri ringtone, String alarmName) {
+    public Alarm(int hour, int minute, int repeatDate, boolean status, String ringtone, String alarmName) {
         this.alarmName = alarmName == null ? UUID.randomUUID().toString() : alarmName;
         setTimeText(hour, minute);
         setRepeat(repeatDate);
@@ -52,11 +52,11 @@ public class Alarm implements Serializable {
         this.alarmName = alarmName;
     }
 
-    public Uri getRingtone() {
+    public String getRingtone() {
         return ringtone;
     }
 
-    public void setRingtone(Uri ringtone) {
+    public void setRingtone(String ringtone) {
         this.ringtone = ringtone;
     }
 
@@ -161,8 +161,7 @@ public class Alarm implements Serializable {
             return null;
         }
 
-        Uri ringtoneUri = Uri.parse(ringtone);
-        return new Alarm(hour, minute, repeatDate, status, ringtoneUri, alarmName);
+        return new Alarm(hour, minute, repeatDate, status, ringtone, alarmName);
 
     }
 }
