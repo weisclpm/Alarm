@@ -7,22 +7,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.weisc.alarm.Alarm;
+import com.example.weisc.alarm.AlarmAlertDialogActivity;
 
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class AlarmService extends Service {
+    private static int alarmId = 0;
     private static final long DAY_INTERVAL = 3600 * 24 * 1000;
     private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
     private Map<String, PendingIntent> alarms = new HashMap<>();
@@ -57,9 +55,8 @@ public class AlarmService extends Service {
         Log.d("ALARM", "响铃时间: " + ((time - System.currentTimeMillis()) / (1000 * 60)));
         Intent intent = new Intent("com.weisc.alarm");
         intent.putExtra("alarm_data", alarm);
-        int id = alarms.size();
         PendingIntent operator = PendingIntent.
-                getBroadcast(AlarmService.this, id++, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                getBroadcast(AlarmService.this, alarmId++, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         if (repeatDate == Alarm.EVERYDAY) {
             alarmManager.setWindow(AlarmManager.RTC_WAKEUP, time, DAY_INTERVAL, operator);
 
@@ -79,6 +76,10 @@ public class AlarmService extends Service {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
+        Log.d("ALARM", "calculate: " + calendar.getTime());
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Log.d("ALARM", "calculate: " + calendar.getTime());
         long dateTime = calendar.getTimeInMillis();
         int curWeek = calendar.get(Calendar.DAY_OF_WEEK);
         curWeek = ((curWeek - 1) % 7) - 1;
@@ -117,6 +118,7 @@ public class AlarmService extends Service {
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "ring!", Toast.LENGTH_SHORT).show();
             Log.d("ALARM", "onReceive: ");
+//            startActivity(new Intent(context, AlarmAlertDialogActivity.class));
 //            Alarm alarm = (Alarm) intent.getSerializableExtra("alarm_data");
 //            String msg = alarm.getRingtone();
 //            Ringtone ringtone = RingtoneManager.getRingtone(context, Uri.parse(msg));
