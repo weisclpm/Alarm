@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.weisc.services.AlarmService;
 
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alarmListView.setAdapter(adapter);
         addAlarm = (ImageButton) findViewById(R.id.addAlarm);
         addAlarm.setOnClickListener(this);
-
-
     }
 
     private void initAlarmService() {
@@ -123,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (resultCode == RESULT_OK) {
                     Alarm alarm = (Alarm) data.getSerializableExtra(ALARM_DATA);
                     adapter.add(alarm);
+                    alarmServiceBinder.setAlarm(alarm);
                     adapter.notifyDataSetChanged();
                 }
                 break;
@@ -174,8 +174,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (alarm.isStatus() != isChecked) {
                         alarm.setStatus(isChecked);
-                        alarmServiceBinder.setAlarm(alarm);
                         Alarm.saveToSP(context, alarm);
+                        if (isChecked) {
+                            alarmServiceBinder.setAlarm(alarm);
+                        } else {
+                            alarmServiceBinder.cancelAlarm(alarm);
+                        }
                     }
                 }
             });

@@ -16,11 +16,7 @@ import android.widget.Toast;
 public class MyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        String msg = intent.getStringExtra("ringtone_uri");
-        Ringtone ringtone = RingtoneManager.getRingtone(context, Uri.parse(msg));
-        ringtone.play();
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-        Log.d("TEST", "onReceive " + ringtone.getTitle(context));
+
 
     }
 }

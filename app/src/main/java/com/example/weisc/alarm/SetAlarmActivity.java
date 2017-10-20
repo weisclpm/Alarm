@@ -65,7 +65,7 @@ public class SetAlarmActivity extends AppCompatActivity implements AdapterView.O
 
     private List<AlarmSettings> initAlarmSettings() {
         List<AlarmSettings> list = new ArrayList<>();
-        list.add(new AlarmSettings("重复", "一次性"));
+        list.add(new AlarmSettings("重复", Alarm.generateDateText(Alarm.ONETIME)));
         ringtone = RingtoneManager.
                 getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
         list.add(new AlarmSettings("铃声", updateRingtoneName(this, ringtone).toString()));

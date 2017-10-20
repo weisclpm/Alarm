@@ -3,20 +3,28 @@ package com.example.weisc.services;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.weisc.alarm.Alarm;
 
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class AlarmService extends Service {
-
+    private static final long DAY_INTERVAL = 3600 * 24 * 1000;
+    private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
     private Map<String, PendingIntent> alarms = new HashMap<>();
     private AlarmManager alarmManager;
 
@@ -25,33 +33,111 @@ public class AlarmService extends Service {
     public class AlarmServiceBinder extends Binder {
         public void setAlarm(Alarm alarm) {
             String key = alarm.getAlarmName();
-            Log.d("TEST", "setAlarm: ");
             if (alarms.containsKey(key)) {
                 Log.d("TEST", "setAlarm: status change");
+                setExistingAlarm(alarm);
             } else {
-                Log.d("TEST", "setAlarm: " + calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate()));
-//                Intent intent = new Intent("com.weisc.alarm");
-//                intent.putExtra("ringtone_uri", alarm.getRingtone());
-//                PendingIntent operator = PendingIntent.
-//                        getBroadcast(AlarmService.this, 0, intent, 0);
-//                int interval = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
-//                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 2000, operator);
-//                Log.d("TEST", "setAlarm: set alarm");
-//                alarms.put(key, operator);
+                setNewAlarm(alarm);
+
             }
         }
+
+        public void cancelAlarm(Alarm alarm) {
+            PendingIntent operator = alarms.get(alarm.getAlarmName());
+            if (operator != null)
+                alarmManager.cancel(operator);
+        }
+    }
+
+
+    private void setNewAlarm(Alarm alarm) {
+        int repeatDate = alarm.getRepeatDate();
+        long time = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
+
+        Log.d("ALARM", "响铃时间: " + ((time - System.currentTimeMillis()) / (1000 * 60)));
+        Intent intent = new Intent("com.weisc.alarm");
+        intent.putExtra("alarm_data", alarm);
+        PendingIntent operator = PendingIntent.
+                getBroadcast(AlarmService.this, new Random().nextInt(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        if (repeatDate == Alarm.EVERYDAY) {
+            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, time, DAY_INTERVAL, operator);
+
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, time - System.currentTimeMillis(), operator);
+        }
+        alarms.put(alarm.getAlarmName(), operator);
+    }
+
+    private void setExistingAlarm(Alarm alarm) {
+        PendingIntent operator = alarms.get(alarm.getAlarmName());
+        long time = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
+        alarmManager.set(AlarmManager.RTC_WAKEUP, time, operator);
     }
 
     private long calculate(int hour, int minute, int repeatDate) {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, hour);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
-        return calendar.getTimeInMillis()-System.currentTimeMillis();
+        long dateTime = calendar.getTimeInMillis();
+        int curWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        curWeek = ((curWeek - 1) % 7) - 1;
+        if (dateTime <= System.currentTimeMillis()) {
+            dateTime = dateTime + DAY_INTERVAL;
+            curWeek++;
+        }
+        if (repeatDate == Alarm.EVERYDAY || repeatDate == Alarm.ONETIME) {
+            return dateTime;
+        } else {
+            int[] repeatDay = Alarm.parseRepeatDate(repeatDate);
+            int dayOfWeek = findNextDay(repeatDay, curWeek);
+            if (dayOfWeek > curWeek) {
+                dateTime = dateTime + (dayOfWeek - curWeek) * DAY_INTERVAL;
+            } else if (dayOfWeek < curWeek) {
+                dateTime = dateTime + (dayOfWeek - curWeek + 7) * DAY_INTERVAL;
+            }
+            return dateTime;
+        }
+    }
+
+    private int findNextDay(int[] repeatDay, int curWeek) {
+        int high = repeatDay.length - 1;
+        if (curWeek > repeatDay[high]) return repeatDay[0];
+        else {
+            while (--high > -1 && repeatDay[high] > curWeek) ;
+            if (high != -1 && repeatDay[high] == curWeek) return curWeek;
+            else return repeatDay[(high + 1) % repeatDay.length];
+        }
+    }
+
+
+    private class AlarmBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(context, "ring!", Toast.LENGTH_SHORT).show();
+            Log.d("ALARM", "onReceive: ");
+//            Alarm alarm = (Alarm) intent.getSerializableExtra("alarm_data");
+//            String msg = alarm.getRingtone();
+//            Ringtone ringtone = RingtoneManager.getRingtone(context, Uri.parse(msg));
+//            ringtone.play();
+//            Log.d("TEST", "onReceive " + ringtone.getTitle(context));
+        }
     }
 
     @Override
     public void onCreate() {
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.weisc.alarm");
+        registerReceiver(new AlarmBroadcastReceiver(), intentFilter);
+
+//        Intent intent = new Intent("com.weisc.alarm");
+//        PendingIntent operator = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + 1);
+//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), operator);
     }
 
     @Override

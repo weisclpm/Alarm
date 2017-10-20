@@ -14,23 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textView_alarmlist"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:text="闹钟列表"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:text="快去创建闹钟吧"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
         <ListView
             android:id="@+id/alarmList"
             android:layout_width="match_parent"
