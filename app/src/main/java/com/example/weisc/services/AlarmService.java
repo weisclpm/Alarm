@@ -57,13 +57,14 @@ public class AlarmService extends Service {
         Log.d("ALARM", "响铃时间: " + ((time - System.currentTimeMillis()) / (1000 * 60)));
         Intent intent = new Intent("com.weisc.alarm");
         intent.putExtra("alarm_data", alarm);
+        int id = alarms.size();
         PendingIntent operator = PendingIntent.
-                getBroadcast(AlarmService.this, new Random().nextInt(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                getBroadcast(AlarmService.this, id++, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         if (repeatDate == Alarm.EVERYDAY) {
             alarmManager.setWindow(AlarmManager.RTC_WAKEUP, time, DAY_INTERVAL, operator);
 
         } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, time - System.currentTimeMillis(), operator);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, operator);
         }
         alarms.put(alarm.getAlarmName(), operator);
     }
