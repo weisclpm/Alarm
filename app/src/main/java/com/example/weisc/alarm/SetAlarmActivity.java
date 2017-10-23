@@ -126,7 +126,7 @@ public class SetAlarmActivity extends AppCompatActivity implements AdapterView.O
         SharedPreferences sp = getSharedPreferences("sp_alarm", MODE_PRIVATE);
         String alarmName = alarm.getAlarmName();
         sp.edit().putString(alarmName, alarmName).commit();
-        alarm.saveToSP(this, alarm);
+        Alarm.saveToSP(this, alarm);
     }
 
     @Override

@@ -11,8 +11,13 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
@@ -23,7 +28,6 @@ import android.widget.Toast;
 
 import com.example.weisc.services.AlarmService;
 
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alarmListView = (ListView) findViewById(R.id.alarmList);
         adapter = new AlarmAdapter(this, R.layout.alarm_item, alarmList);
         alarmListView.setAdapter(adapter);
+        registerForContextMenu(alarmListView);
         addAlarm = (ImageButton) findViewById(R.id.addAlarm);
         addAlarm.setOnClickListener(this);
     }
@@ -67,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initAlarmList() {
+        Log.d("ALARM", "initAlarmList");
         SharedPreferences sp = getSharedPreferences("sp_alarm", MODE_PRIVATE);
         Map<String, ?> maps = sp.getAll();
         if (maps.size() == 0) {
@@ -84,9 +90,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void initAlarm() {
+        for (Alarm alarm : alarmList) {
+            if (alarm.isStatus())
+                alarmServiceBinder.setAlarm(alarm, true);
+        }
+    }
+
+    private void deleteAlarm(Alarm alarm) {
+        if (alarm.isStatus()) {
+            alarmServiceBinder.cancelAlarm(alarm);
+        }
+        adapter.remove(alarm);
+        adapter.notifyDataSetChanged();
+        Alarm.deleteFromSP(this, alarm);
+    }
+
+    private void changeAlarmStatus(Alarm alarm, boolean status) {
+        alarm.setStatus(status);
+        Alarm.saveToSP(this, alarm);
+    }
+
+
     @Override
     public void onBackPressed() {
-        Timer tExit = null;
+        Timer tExit;
         if (isExit == false) {
             isExit = true; // 准备退出
             Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show();
@@ -101,6 +129,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //退出
             finish();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuSettings:
+
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.delete_menu, menu);
+        menu.setHeaderTitle("操作");
+        menu.setHeaderIcon(android.support.v7.appcompat.R.drawable.abc_ic_menu_cut_mtrl_alpha);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int position = info.position;
+        switch (item.getItemId()) {
+            case R.id.menuDelete: {
+                Alarm alarm = adapter.getItem(position);
+                deleteAlarm(alarm);
+                break;
+            }
+        }
+        return super.onContextItemSelected(item);
     }
 
     @Override
@@ -122,24 +190,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (resultCode == RESULT_OK) {
                     Alarm alarm = (Alarm) data.getSerializableExtra(ALARM_DATA);
                     adapter.add(alarm);
-                    alarmServiceBinder.setAlarm(alarm);
+                    alarmServiceBinder.setAlarm(alarm, alarm.isStatus());
                     adapter.notifyDataSetChanged();
                 }
                 break;
         }
     }
 
-    private class AlarmServiceConnection implements ServiceConnection {
+
+    private class AlarmServiceConnection implements ServiceConnection, AlarmService.ActivityCallBack {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             alarmServiceBinder = (AlarmService.AlarmServiceBinder) service;
+            initAlarm();
+            alarmServiceBinder.setActivityCallBack(this);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
 
         }
+
+        @Override
+        public void setAlarmSwitch(Alarm alarm) {
+            Log.d("ALARM", "setAlarmSwitch: ");
+            int size = adapter.getCount();
+            for (int i = 0; i < size; i++) {
+                Alarm item = adapter.getItem(i);
+                if (item.getAlarmName().equals(alarm.getAlarmName())) {
+                    Log.d("ALARM", "setAlarmSwitch: change");
+                    changeAlarmStatus(alarm, false);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
     }
+
 
     private class AlarmAdapter extends ArrayAdapter<Alarm> {
         int resource;
@@ -173,13 +259,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (alarm.isStatus() != isChecked) {
-                        alarm.setStatus(isChecked);
-                        Alarm.saveToSP(context, alarm);
-                        if (isChecked) {
-                            alarmServiceBinder.setAlarm(alarm);
-                        } else {
-                            alarmServiceBinder.cancelAlarm(alarm);
-                        }
+                        changeAlarmStatus(alarm, isChecked);
+                        alarmServiceBinder.setAlarm(alarm, isChecked);
                     }
                 }
             });

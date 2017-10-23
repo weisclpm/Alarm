@@ -129,6 +129,10 @@ public class Alarm implements Serializable {
         return sb.toString();
     }
 
+    public boolean isOnetime() {
+        return repeatDate == ONETIME;
+    }
+
     public static int[] parseRepeatDate(int repeatDate) {
         int repeat_copy = repeatDate;
         int n = 0, index = 0;
@@ -153,12 +157,18 @@ public class Alarm implements Serializable {
         if (alarm.ringtone != null)
             editor.putString(RINGTONE_URI_SP, alarm.ringtone.toString());
         editor.commit();
+    }
 
+    public static void deleteFromSP(Context context, Alarm alarm) {
+        SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
+        sp.edit().clear().commit();
+
+        SharedPreferences sp1 = context.getSharedPreferences("sp_alarm", context.MODE_PRIVATE);
+        sp1.edit().remove(alarm.getAlarmName()).commit();
     }
 
     public static Alarm loadFromSP(Context context, String alarmName) {
         SharedPreferences sp = context.getSharedPreferences(alarmName, context.MODE_PRIVATE);
-//        String timeText = sp.getString(HOUR_SP, null);
         int hour = sp.getInt(HOUR_SP, -1);
         int minute = sp.getInt(MINUTE_SP, -1);
         int repeatDate = sp.getInt(REPEAT_DATE_SP, -1);
