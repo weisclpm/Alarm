@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Alarm item = adapter.getItem(i);
                 if (item.getAlarmName().equals(alarm.getAlarmName())) {
                     Log.d("ALARM", "setAlarmSwitch: change");
-                    changeAlarmStatus(alarm, false);
+                    changeAlarmStatus(item, false);
                     adapter.notifyDataSetChanged();
                 }
             }
