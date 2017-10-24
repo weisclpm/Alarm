@@ -84,11 +84,10 @@ public class AlarmService extends Service {
         long time = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
 
 //        PendingIntent operation = alarms.get(alarm.getAlarmName());
-        sendNotification();
         Intent intent = new Intent(INTENT_ALARM_ACTION);
+//        intent.setAction(INTENT_ALARM_ACTION);
         intent.putExtra(INTENT_ALARM_DATA, alarm);
         intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_SET_ALARM);
-        Toast.makeText(this, "alarm_id:" + alarm.alarm_id, Toast.LENGTH_SHORT).show();
         PendingIntent operation = PendingIntent.
                 getBroadcast(this, alarm.alarm_id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 //            alarms.put(alarm.getAlarmName(), operation);
@@ -97,7 +96,7 @@ public class AlarmService extends Service {
                 new AlarmManager.AlarmClockInfo(time, null);
         alarmManager.setAlarmClock(info, operation);
 //        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, operation);
-        Log.d("ALARM", "setAlarmInService: 设定闹钟" + intent.getIntExtra(INTENT_ALARM_OPT, -1));
+        Log.d("ALARM", "setAlarmInService: 设定闹钟");
     }
 
     private String timeToText(long time) {
@@ -238,7 +237,7 @@ public class AlarmService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            int opt = intent.getIntExtra(INTENT_ALARM_OPT, -1);
+            int opt = intent.getIntExtra(INTENT_ALARM_OPT, 0);
 
             Log.d("ALARM", "onReceive: broadcast receive " + opt + " context Type: " + context.toString());
             switch (opt) {
