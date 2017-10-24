@@ -35,12 +35,15 @@ public class Alarm implements Serializable {
     private String alarmName;
     private String ringtone;
 
+    public int alarm_id;
+
     public Alarm(int hour, int minute, int repeatDate, boolean status, String ringtone, String alarmName) {
         this.alarmName = alarmName == null ? UUID.randomUUID().toString() : alarmName;
         setTimeText(hour, minute);
         setRepeat(repeatDate);
         this.status = status;
         this.ringtone = ringtone;
+        this.alarm_id=hashCode();
     }
 
 

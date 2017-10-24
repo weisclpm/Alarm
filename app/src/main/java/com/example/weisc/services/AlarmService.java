@@ -32,7 +32,7 @@ public class AlarmService extends Service {
     private static final int INTENT_OPT_STOP_NOTIFY = 1;
     private static final long DAY_INTERVAL = 3600 * 24 * 1000;
     private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
-    private Map<String, PendingIntent> alarms = new HashMap<>();
+    //    private Map<String, PendingIntent> alarms = new HashMap<>();
     private AlarmManager alarmManager;
 
     private AlarmServiceBinder binder = new AlarmServiceBinder();
@@ -54,11 +54,10 @@ public class AlarmService extends Service {
         }
 
         public void cancelAlarm(Alarm alarm) {
-            PendingIntent operator = alarms.get(alarm.getAlarmName());
-            if (operator != null) {
-                Log.d("ALARM", "cancelAlarm: 关闭闹钟");
-                alarmManager.cancel(operator);
-            }
+            PendingIntent operator = PendingIntent.getBroadcast(AlarmService.this, alarm.alarm_id,
+                    new Intent(INTENT_ALARM_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+            Log.d("ALARM", "cancelAlarm: 关闭闹钟");
+            alarmManager.cancel(operator);
         }
 
         public void setActivityCallBack(ActivityCallBack ck) {
@@ -84,20 +83,21 @@ public class AlarmService extends Service {
     private void setAlarmInService(Alarm alarm) {
         long time = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
 
-        PendingIntent operation = alarms.get(alarm.getAlarmName());
-        if (operation == null) {
-            Intent intent = new Intent(INTENT_ALARM_ACTION);
-            intent.putExtra(INTENT_ALARM_DATA, alarm);
-            intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_SET_ALARM);
-            operation = PendingIntent.
-                    getBroadcast(AlarmService.this, alarm.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            alarms.put(alarm.getAlarmName(), operation);
-            Toast.makeText(this, "闹钟将在" + timeToText(time) + "之后响起", Toast.LENGTH_LONG).show();
-        }
+//        PendingIntent operation = alarms.get(alarm.getAlarmName());
+        sendNotification();
+        Intent intent = new Intent(INTENT_ALARM_ACTION);
+        intent.putExtra(INTENT_ALARM_DATA, alarm);
+        intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_SET_ALARM);
+        Toast.makeText(this, "alarm_id:" + alarm.alarm_id, Toast.LENGTH_SHORT).show();
+        PendingIntent operation = PendingIntent.
+                getBroadcast(this, alarm.alarm_id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+//            alarms.put(alarm.getAlarmName(), operation);
+        Toast.makeText(this, "闹钟将在" + timeToText(time) + "之后响起", Toast.LENGTH_LONG).show();
         AlarmManager.AlarmClockInfo info =
                 new AlarmManager.AlarmClockInfo(time, null);
         alarmManager.setAlarmClock(info, operation);
-        Log.d("ALARM", "setAlarmInService: 设定闹钟");
+//        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, operation);
+        Log.d("ALARM", "setAlarmInService: 设定闹钟" + intent.getIntExtra(INTENT_ALARM_OPT, -1));
     }
 
     private String timeToText(long time) {
@@ -186,7 +186,7 @@ public class AlarmService extends Service {
         ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
 //        MediaPlayer mediaPlayer=new MediaPlayer();
 //        mediaPlayer.setDataSource(this,);
-        ringtone.play();
+//        ringtone.play();
         Log.d("ALARM", "handleAlarm: isPlaying? " + ringtone.isPlaying());
 
         sendNotification();
@@ -238,11 +238,13 @@ public class AlarmService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("ALARM", "onReceive: broadcast receive ");
             int opt = intent.getIntExtra(INTENT_ALARM_OPT, -1);
+
+            Log.d("ALARM", "onReceive: broadcast receive " + opt + " context Type: " + context.toString());
             switch (opt) {
                 case INTENT_OPT_SET_ALARM: {
                     Alarm alarm = (Alarm) intent.getSerializableExtra(INTENT_ALARM_DATA);
+                    Toast.makeText(context, "alarm=" + (alarm == null), Toast.LENGTH_LONG).show();
                     if (alarm != null) {
                         handleAlarm(alarm);
                     }
@@ -252,6 +254,9 @@ public class AlarmService extends Service {
                     stopNotify();
                     break;
                 }
+                case -1:
+                    Toast.makeText(context, "获取不到值，未知广播", Toast.LENGTH_LONG).show();
+                    break;
             }
 
         }
