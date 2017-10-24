@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -24,8 +25,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AlarmService extends Service {
-    private static final String ALARM_ACTION = "com.weisc.alarm";
-    private static int alarmId = 0;
+    private static final String INTENT_ALARM_ACTION = "com.weisc.alarm";
+    private static final String INTENT_ALARM_DATA = "alarm_data";
+    private static final String INTENT_ALARM_OPT = "alarm_opt";
+    private static final int INTENT_OPT_SET_ALARM = 0;
+    private static final int INTENT_OPT_STOP_NOTIFY = 1;
     private static final long DAY_INTERVAL = 3600 * 24 * 1000;
     private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
     private Map<String, PendingIntent> alarms = new HashMap<>();
@@ -34,8 +38,10 @@ public class AlarmService extends Service {
     private AlarmServiceBinder binder = new AlarmServiceBinder();
     private ActivityCallBack callback;
 
+    private Ringtone ringtone;
+
     public interface ActivityCallBack {
-         void setAlarmSwitch(Alarm alarm);
+        void setAlarmSwitchOff(Alarm alarm);
     }
 
     public class AlarmServiceBinder extends Binder {
@@ -65,7 +71,7 @@ public class AlarmService extends Service {
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ALARM_ACTION);
+        intentFilter.addAction(INTENT_ALARM_ACTION);
         registerReceiver(new AlarmBroadcastReceiver(), intentFilter);
     }
 
@@ -78,24 +84,20 @@ public class AlarmService extends Service {
     private void setAlarmInService(Alarm alarm) {
         long time = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
 
-        PendingIntent operator = alarms.get(alarm.getAlarmName());
-        if (operator == null) {
-            Intent intent = new Intent(ALARM_ACTION);
-            intent.putExtra("alarm_data", alarm);
-            operator = PendingIntent.
-                    getBroadcast(AlarmService.this, alarmId++, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-            alarms.put(alarm.getAlarmName(), operator);
+        PendingIntent operation = alarms.get(alarm.getAlarmName());
+        if (operation == null) {
+            Intent intent = new Intent(INTENT_ALARM_ACTION);
+            intent.putExtra(INTENT_ALARM_DATA, alarm);
+            intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_SET_ALARM);
+            operation = PendingIntent.
+                    getBroadcast(AlarmService.this, alarm.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarms.put(alarm.getAlarmName(), operation);
             Toast.makeText(this, "闹钟将在" + timeToText(time) + "之后响起", Toast.LENGTH_LONG).show();
         }
-
-//        if (repeatDate == Alarm.EVERYDAY) {
-//            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, time, DAY_INTERVAL, operator);
-//
-//        } else {
-//            alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, operator);
-//        }
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, operator);
-        Log.d("ALARM", "setAlarmInService: 设定闹钟" + (alarmId - 1));
+        AlarmManager.AlarmClockInfo info =
+                new AlarmManager.AlarmClockInfo(time, null);
+        alarmManager.setAlarmClock(info, operation);
+        Log.d("ALARM", "setAlarmInService: 设定闹钟");
     }
 
     private String timeToText(long time) {
@@ -179,30 +181,56 @@ public class AlarmService extends Service {
 
     private void handleAlarm(Alarm alarm) {
 
-        sendNotification(alarm.getRingtone());
+        Uri ringtoneUri = Uri.parse(alarm.getRingtone());
+        if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
+        ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
+//        MediaPlayer mediaPlayer=new MediaPlayer();
+//        mediaPlayer.setDataSource(this,);
+        ringtone.play();
+        Log.d("ALARM", "handleAlarm: isPlaying? " + ringtone.isPlaying());
+
+        sendNotification();
         if (!alarm.isOnetime()) {
             setAlarmInService(alarm);
+        } else {
+            callback.setAlarmSwitchOff(alarm);
         }
-        callback.setAlarmSwitch(alarm);
 
 
     }
 
-    private void sendNotification(String ringtoneStr) {
+
+    private void sendNotification() {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification.Builder builder = new Notification.Builder(this);
-        builder.setContentText("闹钟响了");
-        builder.setContentTitle("闹钟");
-        builder.setSmallIcon(android.support.v7.appcompat.R.drawable.notification_icon_background);
+        Intent intent = new Intent(INTENT_ALARM_ACTION);
+        intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_STOP_NOTIFY);
         PendingIntent pendingIntent = PendingIntent.
-                getActivity(this, 1, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setFullScreenIntent(pendingIntent, true);
+                getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification.Builder builder = new Notification.Builder(this)
+                .setContentTitle("闹钟")
+                .setContentText("时间到了！")
+                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                .setAutoCancel(false)
+                .setFullScreenIntent(pendingIntent, true);
+
+        Notification.Action.Builder dismiss =
+                new Notification.Action.Builder(android.R.drawable.ic_lock_idle_alarm, "停止"
+                        , pendingIntent);
+        builder.addAction(dismiss.build());
+
+
         Notification notification = builder.build();
+
         notificationManager.notify(0, notification);
 
-        Uri ringtoneUri = Uri.parse(ringtoneStr);
-        Ringtone ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
+    }
+
+    private void stopNotify() {
+        if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        manager.cancel(0);
+        Log.d("ALARM", "stopNotify: cancel");
     }
 
 
@@ -210,11 +238,24 @@ public class AlarmService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, "ring!", Toast.LENGTH_SHORT).show();
-            Log.d("ALARM", "onReceive: ");
-            Alarm alarm = (Alarm) intent.getSerializableExtra("alarm_data");
-            handleAlarm(alarm);
+            Log.d("ALARM", "onReceive: broadcast receive ");
+            int opt = intent.getIntExtra(INTENT_ALARM_OPT, -1);
+            switch (opt) {
+                case INTENT_OPT_SET_ALARM: {
+                    Alarm alarm = (Alarm) intent.getSerializableExtra(INTENT_ALARM_DATA);
+                    if (alarm != null) {
+                        handleAlarm(alarm);
+                    }
+                    break;
+                }
+                case INTENT_OPT_STOP_NOTIFY: {
+                    stopNotify();
+                    break;
+                }
+            }
+
         }
     }
+
 
 }

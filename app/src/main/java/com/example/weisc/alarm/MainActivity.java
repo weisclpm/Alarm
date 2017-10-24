@@ -212,13 +212,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         @Override
-        public void setAlarmSwitch(Alarm alarm) {
-            Log.d("ALARM", "setAlarmSwitch: ");
+        public void setAlarmSwitchOff(Alarm alarm) {
+            Log.d("ALARM", "setAlarmSwitchOff: ");
             int size = adapter.getCount();
             for (int i = 0; i < size; i++) {
                 Alarm item = adapter.getItem(i);
                 if (item.getAlarmName().equals(alarm.getAlarmName())) {
-                    Log.d("ALARM", "setAlarmSwitch: change");
+                    Log.d("ALARM", "setAlarmSwitchOff: change");
                     changeAlarmStatus(item, false);
                     adapter.notifyDataSetChanged();
                 }
