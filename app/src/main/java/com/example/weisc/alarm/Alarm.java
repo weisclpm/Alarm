@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.UUID;
 
 /**
@@ -19,6 +20,9 @@ public class Alarm implements Serializable {
     public static final int WORKDAY = 31;
     public static final int WEEKEND = 96;
     public static final int EVERYDAY = 127;
+
+    private static final long DAY_INTERVAL = 3600 * 24 * 1000;
+    private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
 
     private static final String HOUR_SP = "HOUR";
     private static final String MINUTE_SP = "MINUTE";
@@ -43,7 +47,7 @@ public class Alarm implements Serializable {
         setRepeat(repeatDate);
         this.status = status;
         this.ringtone = ringtone;
-        this.alarm_id=hashCode();
+        this.alarm_id = hashCode();
     }
 
 
@@ -150,6 +154,10 @@ public class Alarm implements Serializable {
         return Arrays.copyOf(repeatDay, index);
     }
 
+    public long nextTimeInMills() {
+        return calculate(hour, minute, repeatDate);
+    }
+
     public static void saveToSP(Context context, Alarm alarm) {
         SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -185,5 +193,80 @@ public class Alarm implements Serializable {
 
         return new Alarm(hour, minute, repeatDate, status, ringtone, alarmName);
 
+    }
+
+
+    public static String timeToText(long time) {
+        Calendar current = Calendar.getInstance();
+        Calendar future = Calendar.getInstance();
+        future.setTimeInMillis(time);
+
+        int day = future.get(Calendar.DAY_OF_WEEK) - current.get(Calendar.DAY_OF_WEEK);
+        int hour = future.get(Calendar.HOUR) - current.get(Calendar.HOUR);
+        int minute = future.get(Calendar.MINUTE) - current.get(Calendar.MINUTE);
+        int second = future.get(Calendar.SECOND) - current.get(Calendar.SECOND);
+        if (second < 0) {
+            second += 60;
+            minute--;
+        }
+        if (minute < 0) {
+            minute += 60;
+            hour--;
+        }
+        if (hour < 0) {
+            hour += 24;
+            day--;
+        }
+        if (day < 0) {
+            day += 7;
+        }
+
+        StringBuilder resultText = new StringBuilder();
+        if (day > 0) resultText.append(Integer.toString(day) + "天");
+        if (hour > 0) resultText.append(Integer.toString(hour) + "小时");
+        if (minute > 0) resultText.append(Integer.toString(minute) + "分");
+        if (second > 0) resultText.append(Integer.toString(second) + "秒");
+
+        return resultText.toString();
+
+
+    }
+
+    private long calculate(int hour, int minute, int repeatDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long dateTime = calendar.getTimeInMillis();
+        int curWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        curWeek = ((curWeek - 1) % 7) - 1;
+        if (dateTime <= System.currentTimeMillis()) {
+            dateTime = dateTime + DAY_INTERVAL;
+            curWeek++;
+        }
+        if (repeatDate == Alarm.EVERYDAY || repeatDate == Alarm.ONETIME) {
+            return dateTime;
+        } else {
+            int[] repeatDay = Alarm.parseRepeatDate(repeatDate);
+            int dayOfWeek = findNextDay(repeatDay, curWeek);
+            Log.d("ALARM", "calculate: "+dayOfWeek);
+            if (dayOfWeek > curWeek) {
+                dateTime = dateTime + (dayOfWeek - curWeek) * DAY_INTERVAL;
+            } else if (dayOfWeek < curWeek) {
+                dateTime = dateTime + (dayOfWeek - curWeek + 7) * DAY_INTERVAL;
+            }
+            return dateTime;
+        }
+    }
+
+    private int findNextDay(int[] repeatDay, int curWeek) {
+        int high = repeatDay.length - 1;
+        if (curWeek > repeatDay[high]) return repeatDay[0];
+        else {
+            while (--high > -1 && repeatDay[high] > curWeek) ;
+            if (high != -1 && repeatDay[high] == curWeek) return curWeek;
+            else return repeatDay[(high + 1) % repeatDay.length];
+        }
     }
 }

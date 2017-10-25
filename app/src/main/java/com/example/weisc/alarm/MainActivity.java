@@ -192,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     adapter.add(alarm);
                     alarmServiceBinder.setAlarm(alarm, alarm.isStatus());
                     adapter.notifyDataSetChanged();
+                    Toast.makeText(this, "闹钟将在" + Alarm.timeToText(alarm.nextTimeInMills()) +
+                            "之后响起", Toast.LENGTH_LONG).show();
                 }
                 break;
         }
