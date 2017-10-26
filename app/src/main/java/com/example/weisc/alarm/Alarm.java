@@ -8,6 +8,10 @@ import android.util.Log;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -15,7 +19,6 @@ import java.util.UUID;
  */
 
 public class Alarm implements Serializable {
-
     public static final int ONETIME = 0;
     public static final int WORKDAY = 31;
     public static final int WEEKEND = 96;
@@ -29,6 +32,8 @@ public class Alarm implements Serializable {
     private static final String REPEAT_DATE_SP = "REPEAT_DATE";
     private static final String STATUS_SP = "STATUS";
     private static final String RINGTONE_URI_SP = "RINGTONE_URI";
+
+    private static Map<String, Alarm> alarms = new HashMap<>();
 
     private boolean status;
     private int hour;
@@ -48,6 +53,7 @@ public class Alarm implements Serializable {
         this.status = status;
         this.ringtone = ringtone;
         this.alarm_id = hashCode();
+        alarms.put(this.alarmName, this);
     }
 
 
@@ -158,6 +164,10 @@ public class Alarm implements Serializable {
         return calculate(hour, minute, repeatDate);
     }
 
+    public static Alarm findAlarm(String alarmName) {
+        return alarms.get(alarmName);
+    }
+
     public static void saveToSP(Context context, Alarm alarm) {
         SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -170,7 +180,12 @@ public class Alarm implements Serializable {
         editor.commit();
     }
 
-    public static void deleteFromSP(Context context, Alarm alarm) {
+    public static void deleteAlarm(Context context, Alarm alarm) {
+        alarms.remove(alarm.getAlarmName());
+        deleteFromSP(context, alarm);
+    }
+
+    private static void deleteFromSP(Context context, Alarm alarm) {
         SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
         sp.edit().clear().commit();
 
@@ -232,6 +247,7 @@ public class Alarm implements Serializable {
 
     }
 
+
     private long calculate(int hour, int minute, int repeatDate) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
@@ -250,7 +266,7 @@ public class Alarm implements Serializable {
         } else {
             int[] repeatDay = Alarm.parseRepeatDate(repeatDate);
             int dayOfWeek = findNextDay(repeatDay, curWeek);
-            Log.d("ALARM", "calculate: "+dayOfWeek);
+            Log.d("ALARM", "calculate: " + dayOfWeek);
             if (dayOfWeek > curWeek) {
                 dateTime = dateTime + (dayOfWeek - curWeek) * DAY_INTERVAL;
             } else if (dayOfWeek < curWeek) {

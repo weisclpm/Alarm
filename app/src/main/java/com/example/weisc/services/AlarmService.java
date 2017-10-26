@@ -19,11 +19,11 @@ import android.util.Log;
 import com.example.weisc.alarm.Alarm;
 
 public class AlarmService extends Service {
-    private static final String INTENT_ALARM_ACTION = "com.weisc.alarm";
-    private static final String INTENT_ALARM_DATA = "alarm_data";
-    private static final String INTENT_ALARM_OPT = "alarm_opt";
-    private static final int INTENT_OPT_SET_ALARM = 0;
-    private static final int INTENT_OPT_STOP_NOTIFY = 1;
+    public static final String INTENT_ALARM_ACTION = "com.weisc.alarm";
+    public static final String INTENT_ALARM_NAME = "alarm_data";
+    public static final String INTENT_ALARM_OPT = "alarm_opt";
+    public static final int INTENT_OPT_SET_ALARM = 0;
+    public static final int INTENT_OPT_STOP_NOTIFY = 1;
     private AlarmManager alarmManager;
 
     private AlarmServiceBinder binder = new AlarmServiceBinder();
@@ -59,7 +59,6 @@ public class AlarmService extends Service {
     @Override
     public void onCreate() {
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(INTENT_ALARM_ACTION);
         registerReceiver(new AlarmBroadcastReceiver(), intentFilter);
@@ -72,10 +71,9 @@ public class AlarmService extends Service {
 
 
     private void setAlarmInService(Alarm alarm) {
-//        long time = calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
         long time = alarm.nextTimeInMills();
         Intent intent = new Intent(INTENT_ALARM_ACTION);
-        intent.putExtra(INTENT_ALARM_DATA, alarm);
+        intent.putExtra(INTENT_ALARM_NAME, alarm.getAlarmName());
         intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_SET_ALARM);
         PendingIntent operation = PendingIntent.
                 getBroadcast(this, alarm.alarm_id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -85,8 +83,9 @@ public class AlarmService extends Service {
         Log.d("ALARM", "setAlarmInService: 设定闹钟 " + Alarm.timeToText(time));
     }
 
-    private void handleAlarm(Alarm alarm) {
+    private void handleAlarm(String alarmName) {
 
+        Alarm alarm = Alarm.findAlarm(alarmName);
         Uri ringtoneUri = Uri.parse(alarm.getRingtone());
         if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
         ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
@@ -102,24 +101,25 @@ public class AlarmService extends Service {
 
     }
 
-
     private void sendNotification() {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Intent intent = new Intent(INTENT_ALARM_ACTION);
-        intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_STOP_NOTIFY);
         PendingIntent pendingIntent = PendingIntent.
-                getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                getBroadcast(this, 1, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
         Notification.Builder builder = new Notification.Builder(this)
                 .setContentTitle("闹钟")
                 .setContentText("时间到了！")
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                .setAutoCancel(false)
-                .setFullScreenIntent(pendingIntent, true);
+                .setAutoCancel(false).setFullScreenIntent(pendingIntent, true);
 
+        //停止动作
+        Intent intent = new Intent(INTENT_ALARM_ACTION);
+        intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_STOP_NOTIFY);
+        PendingIntent dismissOperation = PendingIntent.getBroadcast
+                (this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         Notification.Action.Builder dismiss =
                 new Notification.Action.Builder(android.R.drawable.ic_lock_idle_alarm, "停止"
-                        , pendingIntent);
+                        , dismissOperation);
         builder.addAction(dismiss.build());
 
 
@@ -136,17 +136,16 @@ public class AlarmService extends Service {
     }
 
 
-    private class AlarmBroadcastReceiver extends BroadcastReceiver {
-
+    public class AlarmBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             int opt = intent.getIntExtra(INTENT_ALARM_OPT, -1);
             Log.d("ALARM", "onReceive: broadcast receive opt " + opt);
             switch (opt) {
                 case INTENT_OPT_SET_ALARM: {
-                    Alarm alarm = (Alarm) intent.getSerializableExtra(INTENT_ALARM_DATA);
-                    handleAlarm(alarm);
-                    if (alarm != null) {
+                    String alarmName = intent.getStringExtra(INTENT_ALARM_NAME);
+                    if (alarmName != null) {
+                        handleAlarm(alarmName);
                     }
                     break;
                 }

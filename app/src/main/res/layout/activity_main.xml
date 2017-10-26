@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:longClickable="true"
             android:paddingTop="0dp" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -27,14 +28,14 @@
     </LinearLayout>
 
 
-
-    <ImageButton
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/addAlarm"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
-        android:src="@android:drawable/ic_input_add" />
+        android:src="@android:drawable/ic_input_add">
+    </android.support.design.widget.FloatingActionButton>
 
 
 </RelativeLayout>

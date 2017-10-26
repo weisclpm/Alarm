@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -28,8 +30,8 @@ import android.widget.Toast;
 
 import com.example.weisc.services.AlarmService;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,11 +43,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String ALARM_DATA = "ALARM_DATA";
 
     private boolean isExit;
-    private List<Alarm> alarmList = new LinkedList<>();
+    private List<Alarm> alarmList = new ArrayList<>();
     private ListView alarmListView;
     private AlarmAdapter adapter;
 
-    private ImageButton addAlarm;
+    private FloatingActionButton addAlarm;
 
     private AlarmService.AlarmServiceBinder alarmServiceBinder;
 
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adapter = new AlarmAdapter(this, R.layout.alarm_item, alarmList);
         alarmListView.setAdapter(adapter);
         registerForContextMenu(alarmListView);
-        addAlarm = (ImageButton) findViewById(R.id.addAlarm);
+        addAlarm = (FloatingActionButton) findViewById(R.id.addAlarm);
         addAlarm.setOnClickListener(this);
     }
 
@@ -80,11 +82,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         Set<String> idSet = maps.keySet();
         Iterator<String> i = idSet.iterator();
+        int index = 0;
         while (i.hasNext()) {
             String alarmName = i.next();
             Alarm alarm = Alarm.loadFromSP(this, alarmName);
             if (alarm != null) {
                 alarmList.add(alarm);
+                Log.d("TEST", "initAlarmList: " + index++ + " " + alarmName);
             }
         }
 
@@ -103,14 +107,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         adapter.remove(alarm);
         adapter.notifyDataSetChanged();
-        Alarm.deleteFromSP(this, alarm);
+        Alarm.deleteAlarm(this, alarm);
     }
-
-    private void changeAlarmStatus(Alarm alarm, boolean status) {
-        alarm.setStatus(status);
-        Alarm.saveToSP(this, alarm);
-    }
-
 
     @Override
     public void onBackPressed() {
@@ -216,27 +214,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void setAlarmSwitchOff(Alarm alarm) {
             Log.d("ALARM", "setAlarmSwitchOff: ");
-            int size = adapter.getCount();
-            for (int i = 0; i < size; i++) {
-                Alarm item = adapter.getItem(i);
-                if (item.getAlarmName().equals(alarm.getAlarmName())) {
-                    Log.d("ALARM", "setAlarmSwitchOff: change");
-                    changeAlarmStatus(item, false);
-                    adapter.notifyDataSetChanged();
-                }
-            }
+            adapter.changeAlarmStatus(alarm, false);
         }
     }
 
 
     private class AlarmAdapter extends ArrayAdapter<Alarm> {
-        int resource;
-        Context context;
+        private int resource;
+        private Context context;
 
         public AlarmAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<Alarm> objects) {
             super(context, resource, objects);
             this.resource = resource;
             this.context = context;
+        }
+
+        public void changeAlarmStatus(@Nullable Alarm alarm, boolean status) {
+            int size = getCount();
+            for (int i = 0; i < size; i++) {
+                Alarm item = getItem(i);
+                if (item.getAlarmName().equals(alarm.getAlarmName())) {
+                    item.setStatus(status);
+                    Alarm.saveToSP(context, item);
+                    notifyDataSetChanged();
+                }
+            }
         }
 
         @Override
