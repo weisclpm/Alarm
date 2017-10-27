@@ -33,8 +33,6 @@ public class Alarm implements Serializable {
     private static final String STATUS_SP = "STATUS";
     private static final String RINGTONE_URI_SP = "RINGTONE_URI";
 
-    private static Map<String, Alarm> alarms = new HashMap<>();
-
     private boolean status;
     private int hour;
     private int minute;
@@ -53,7 +51,6 @@ public class Alarm implements Serializable {
         this.status = status;
         this.ringtone = ringtone;
         this.alarm_id = hashCode();
-        alarms.put(this.alarmName, this);
     }
 
 
@@ -164,10 +161,6 @@ public class Alarm implements Serializable {
         return calculate(hour, minute, repeatDate);
     }
 
-    public static Alarm findAlarm(String alarmName) {
-        return alarms.get(alarmName);
-    }
-
     public static void saveToSP(Context context, Alarm alarm) {
         SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -181,7 +174,6 @@ public class Alarm implements Serializable {
     }
 
     public static void deleteAlarm(Context context, Alarm alarm) {
-        alarms.remove(alarm.getAlarmName());
         deleteFromSP(context, alarm);
     }
 
