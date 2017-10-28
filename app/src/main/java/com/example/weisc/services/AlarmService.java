@@ -25,6 +25,7 @@ public class AlarmService extends Service {
     public static final int INTENT_OPT_SET_ALARM = 0;
     public static final int INTENT_OPT_STOP_NOTIFY = 1;
     private AlarmManager alarmManager;
+    private AlarmBroadcastReceiver receiver;
 
     private AlarmServiceBinder binder = new AlarmServiceBinder();
     private ActivityCallBack callback;
@@ -61,7 +62,14 @@ public class AlarmService extends Service {
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(INTENT_ALARM_ACTION);
-        registerReceiver(new AlarmBroadcastReceiver(), intentFilter);
+        receiver = new AlarmBroadcastReceiver();
+        registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 
     @Override
