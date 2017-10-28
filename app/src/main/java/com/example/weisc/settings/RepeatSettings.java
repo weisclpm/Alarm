@@ -21,8 +21,8 @@ import com.example.weisc.alarm.R;
  */
 
 public class RepeatSettings extends AppCompatActivity implements AdapterView.OnItemClickListener {
+    public static final String REPEAT_DATE = "REPEAT_DATE";
     private static final String[] items = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
-    private static final String REPEAT_DATE = "REPEAT_DATE";
     private int repeatDate;
 
     private ListView listView;

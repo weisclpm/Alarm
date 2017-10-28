@@ -86,7 +86,8 @@ public class AlarmService extends Service {
     private void handleAlarm(String alarmName) {
 
         Alarm alarm = Alarm.loadFromSP(this, alarmName);
-        Uri ringtoneUri = Uri.parse(alarm.getRingtone());
+        String ringtoneStr = alarm.getRingtone();
+        Uri ringtoneUri = ringtoneStr == null ? null : Uri.parse(ringtoneStr);
         if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
         ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
         ringtone.play();

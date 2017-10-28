@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.LayoutRes;
@@ -40,7 +41,6 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int CREATE_ALARM = 1;
-    private static final String ALARM_DATA = "ALARM_DATA";
 
     private boolean isExit;
     private List<Alarm> alarmList = new ArrayList<>();
@@ -186,7 +186,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (requestCode) {
             case CREATE_ALARM:
                 if (resultCode == RESULT_OK) {
-                    Alarm alarm = (Alarm) data.getSerializableExtra(ALARM_DATA);
+                    int hour = data.getIntExtra(SetAlarmActivity.INTENT_ALARM_DATA_HOUR, -1);
+                    int minute = data.getIntExtra(SetAlarmActivity.INTENT_ALARM_DATA_MINUTE, -1);
+                    int repeatDate = data.getIntExtra(SetAlarmActivity.INTENT_ALARM_DATA_REPEAT, -1);
+                    if (hour == -1 || minute == -1 || repeatDate == -1) {
+                        Log.d("ALARM", "Alarm 创建失败");
+                        return;
+                    }
+                    String ringtone = data.getStringExtra(SetAlarmActivity.INTENT_ALARM_DATA_RINGTONE);
+                    Alarm alarm = new Alarm(hour, minute, repeatDate, true, ringtone, null);
+                    Alarm.saveToSP(this, alarm);
                     adapter.add(alarm);
                     alarmServiceBinder.setAlarm(alarm, alarm.isStatus());
                     adapter.notifyDataSetChanged();

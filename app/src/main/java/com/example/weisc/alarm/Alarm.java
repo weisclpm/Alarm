@@ -8,10 +8,6 @@ import android.util.Log;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -27,11 +23,11 @@ public class Alarm implements Serializable {
     private static final long DAY_INTERVAL = 3600 * 24 * 1000;
     private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
 
-    private static final String HOUR_SP = "HOUR";
-    private static final String MINUTE_SP = "MINUTE";
-    private static final String REPEAT_DATE_SP = "REPEAT_DATE";
-    private static final String STATUS_SP = "STATUS";
-    private static final String RINGTONE_URI_SP = "RINGTONE_URI";
+    private static final String SP_HOUR = "HOUR";
+    private static final String SP_MINUTE = "MINUTE";
+    private static final String SP_REPEAT_DATE = "REPEAT_DATE";
+    private static final String SP_STATUS = "STATUS";
+    private static final String SP_RINGTONE_URI = "RINGTONE_URI";
 
     private boolean status;
     private int hour;
@@ -162,14 +158,18 @@ public class Alarm implements Serializable {
     }
 
     public static void saveToSP(Context context, Alarm alarm) {
+        SharedPreferences sp1 = context.getSharedPreferences("sp_alarm", context.MODE_PRIVATE);
+        String alarmName = alarm.getAlarmName();
+        sp1.edit().putString(alarmName, alarmName).commit();
+
         SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putInt(HOUR_SP, alarm.hour);
-        editor.putInt(MINUTE_SP, alarm.minute);
-        editor.putInt(REPEAT_DATE_SP, alarm.repeatDate);
-        editor.putBoolean(STATUS_SP, alarm.status);
+        editor.putInt(SP_HOUR, alarm.hour);
+        editor.putInt(SP_MINUTE, alarm.minute);
+        editor.putInt(SP_REPEAT_DATE, alarm.repeatDate);
+        editor.putBoolean(SP_STATUS, alarm.status);
         if (alarm.ringtone != null)
-            editor.putString(RINGTONE_URI_SP, alarm.ringtone.toString());
+            editor.putString(SP_RINGTONE_URI, alarm.ringtone.toString());
         editor.commit();
     }
 
@@ -187,11 +187,11 @@ public class Alarm implements Serializable {
 
     public static Alarm loadFromSP(Context context, String alarmName) {
         SharedPreferences sp = context.getSharedPreferences(alarmName, context.MODE_PRIVATE);
-        int hour = sp.getInt(HOUR_SP, -1);
-        int minute = sp.getInt(MINUTE_SP, -1);
-        int repeatDate = sp.getInt(REPEAT_DATE_SP, -1);
-        boolean status = sp.getBoolean(STATUS_SP, false);
-        String ringtone = sp.getString(RINGTONE_URI_SP, null);
+        int hour = sp.getInt(SP_HOUR, -1);
+        int minute = sp.getInt(SP_MINUTE, -1);
+        int repeatDate = sp.getInt(SP_REPEAT_DATE, -1);
+        boolean status = sp.getBoolean(SP_STATUS, false);
+        String ringtone = sp.getString(SP_RINGTONE_URI, null);
 
         if (hour == -1 || minute == -1 || repeatDate == -1) {
             sp.edit().clear().commit();
@@ -258,7 +258,6 @@ public class Alarm implements Serializable {
         } else {
             int[] repeatDay = Alarm.parseRepeatDate(repeatDate);
             int dayOfWeek = findNextDay(repeatDay, curWeek);
-            Log.d("ALARM", "calculate: " + dayOfWeek);
             if (dayOfWeek > curWeek) {
                 dateTime = dateTime + (dayOfWeek - curWeek) * DAY_INTERVAL;
             } else if (dayOfWeek < curWeek) {
