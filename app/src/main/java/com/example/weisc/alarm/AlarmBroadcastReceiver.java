@@ -18,11 +18,11 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         Handler serviceHandler = AlarmService.getHandler();
-        if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+        if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             //处理开机
             Log.d("Alarm", "onReceive: 开机");
         }
-        if (action.equals(Constant.INTENT_ALARM_BROADCAST_ACTION)) {
+        if (Constant.INTENT_ALARM_BROADCAST_ACTION.equals(action)) {
             int opt = intent.getIntExtra(Constant.INTENT_ALARM_OPT, -1);
             Log.d("ALARM", "onReceive: broadcast receive opt " + opt);
             switch (opt) {
