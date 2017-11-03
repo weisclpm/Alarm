@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.weisc.alarm.util.Constant;
 
@@ -19,6 +20,7 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
         Handler serviceHandler = AlarmService.getHandler();
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             //处理开机
+            Log.d("Alarm", "onReceive: 开机");
         }
         if (action.equals(Constant.INTENT_ALARM_BROADCAST_ACTION)) {
             int opt = intent.getIntExtra(Constant.INTENT_ALARM_OPT, -1);
