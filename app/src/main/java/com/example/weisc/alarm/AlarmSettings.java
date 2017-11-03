@@ -9,7 +9,7 @@ import java.util.Map;
  * Created by weisc on 17-10-17.
  */
 
-public class AlarmSettings extends AppCompatActivity {
+public class AlarmSettings{
     private String settingsName;
     private String settingsType;
 

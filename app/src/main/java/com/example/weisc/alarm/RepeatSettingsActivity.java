@@ -1,4 +1,4 @@
-package com.example.weisc.settings;
+package com.example.weisc.alarm;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +20,7 @@ import com.example.weisc.alarm.R;
  * Created by weisc on 17-10-16.
  */
 
-public class RepeatSettings extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class RepeatSettingsActivity extends MyBaseActivity implements AdapterView.OnItemClickListener {
     public static final String REPEAT_DATE = "REPEAT_DATE";
     private static final String[] items = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
     private int repeatDate;

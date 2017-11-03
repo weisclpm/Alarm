@@ -4,8 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.LayoutRes;
@@ -23,23 +22,19 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.weisc.services.AlarmService;
+import com.example.weisc.alarm.data.AlarmDao;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends MyBaseActivity implements View.OnClickListener {
     private static final int CREATE_ALARM = 1;
 
     private boolean isExit;
@@ -53,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initAlarmService();
         initAlarmList();
@@ -64,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         registerForContextMenu(alarmListView);
         addAlarm = (FloatingActionButton) findViewById(R.id.addAlarm);
         addAlarm.setOnClickListener(this);
+
+        super.onCreate(savedInstanceState);
     }
 
     private void initAlarmService() {
@@ -75,23 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initAlarmList() {
         Log.d("ALARM", "initAlarmList");
-        SharedPreferences sp = getSharedPreferences("sp_alarm", MODE_PRIVATE);
-        Map<String, ?> maps = sp.getAll();
-        if (maps.size() == 0) {
-            return;
-        }
-        Set<String> idSet = maps.keySet();
-        Iterator<String> i = idSet.iterator();
-        int index = 0;
-        while (i.hasNext()) {
-            String alarmName = i.next();
-            Alarm alarm = Alarm.loadFromSP(this, alarmName);
-            if (alarm != null) {
-                alarmList.add(alarm);
-                Log.d("TEST", "initAlarmList: " + index++ + " " + alarmName);
-            }
-        }
-
+        alarmList = AlarmDao.loadAlarms(this);
     }
 
     private void initAlarm() {
@@ -107,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         adapter.remove(alarm);
         adapter.notifyDataSetChanged();
-        Alarm.deleteAlarm(this, alarm);
+        AlarmDao.deleteAlarm(this, alarm);
     }
 
     @Override
@@ -194,8 +173,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         return;
                     }
                     String ringtone = data.getStringExtra(SetAlarmActivity.INTENT_ALARM_DATA_RINGTONE);
-                    Alarm alarm = new Alarm(hour, minute, repeatDate, true, ringtone, null);
-                    Alarm.saveToSP(this, alarm);
+                    Alarm alarm = new Alarm(-1, hour, minute, repeatDate, true, ringtone);
+                    AlarmDao.saveAlarm(this, alarm);
                     adapter.add(alarm);
                     alarmServiceBinder.setAlarm(alarm, alarm.isStatus());
                     adapter.notifyDataSetChanged();
@@ -207,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private class AlarmServiceConnection implements ServiceConnection, AlarmService.ActivityCallBack {
+    private class AlarmServiceConnection implements ServiceConnection, AlarmService.ActivityCallback {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             alarmServiceBinder = (AlarmService.AlarmServiceBinder) service;
@@ -242,9 +221,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             int size = getCount();
             for (int i = 0; i < size; i++) {
                 Alarm item = getItem(i);
-                if (item.getAlarmName().equals(alarm.getAlarmName())) {
+                if (item.getId() == alarm.getId()) {
                     item.setStatus(status);
-                    Alarm.saveToSP(context, item);
+                    AlarmDao.saveAlarm(context, item);
                     notifyDataSetChanged();
                 }
             }
@@ -258,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (convertView == null) {
                 view = getLayoutInflater().from(getContext()).inflate(resource, parent, false);
                 viewHolder = new ViewHolder();
-                viewHolder.alarmName = view.findViewById(R.id.alarmName);
+                viewHolder.alarmTimeText = view.findViewById(R.id.alarmTimeText);
                 viewHolder.aSwitch = view.findViewById(R.id.alarmSwitch);
                 viewHolder.repeatDate = view.findViewById(R.id.alarmRepeat);
                 view.setTag(viewHolder);
@@ -267,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            viewHolder.alarmName.setText(alarm.getTimeText());
+            viewHolder.alarmTimeText.setText(alarm.getTimeText());
             viewHolder.aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -283,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         class ViewHolder {
-            TextView alarmName;
+            TextView alarmTimeText;
             Switch aSwitch;
             TextView repeatDate;
         }

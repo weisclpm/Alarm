@@ -1,14 +1,9 @@
 package com.example.weisc.alarm;
 
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.UUID;
 
 /**
  * Created by weisc on 17-10-16.
@@ -23,25 +18,19 @@ public class Alarm implements Serializable {
     private static final long DAY_INTERVAL = 3600 * 24 * 1000;
     private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
 
-    private static final String SP_HOUR = "HOUR";
-    private static final String SP_MINUTE = "MINUTE";
-    private static final String SP_REPEAT_DATE = "REPEAT_DATE";
-    private static final String SP_STATUS = "STATUS";
-    private static final String SP_RINGTONE_URI = "RINGTONE_URI";
-
     private boolean status;
     private int hour;
     private int minute;
     private int repeatDate;
     private String timeText;
     private String repeatText;
-    private String alarmName;
+    private int id;
     private String ringtone;
 
     public int alarm_id;
 
-    public Alarm(int hour, int minute, int repeatDate, boolean status, String ringtone, String alarmName) {
-        this.alarmName = alarmName == null ? UUID.randomUUID().toString() : alarmName;
+    public Alarm(int id, int hour, int minute, int repeatDate, boolean status, String ringtone) {
+        this.id = id;
         setTimeText(hour, minute);
         setRepeat(repeatDate);
         this.status = status;
@@ -50,12 +39,12 @@ public class Alarm implements Serializable {
     }
 
 
-    public String getAlarmName() {
-        return alarmName;
+    public int getId() {
+        return id;
     }
 
-    public void setAlarmName(String alarmName) {
-        this.alarmName = alarmName;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getRingtone() {
@@ -155,51 +144,6 @@ public class Alarm implements Serializable {
 
     public long nextTimeInMills() {
         return calculate(hour, minute, repeatDate);
-    }
-
-    public static void saveToSP(Context context, Alarm alarm) {
-        SharedPreferences sp1 = context.getSharedPreferences("sp_alarm", context.MODE_PRIVATE);
-        String alarmName = alarm.getAlarmName();
-        sp1.edit().putString(alarmName, alarmName).commit();
-
-        SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putInt(SP_HOUR, alarm.hour);
-        editor.putInt(SP_MINUTE, alarm.minute);
-        editor.putInt(SP_REPEAT_DATE, alarm.repeatDate);
-        editor.putBoolean(SP_STATUS, alarm.status);
-        if (alarm.ringtone != null)
-            editor.putString(SP_RINGTONE_URI, alarm.ringtone.toString());
-        editor.commit();
-    }
-
-    public static void deleteAlarm(Context context, Alarm alarm) {
-        deleteFromSP(context, alarm);
-    }
-
-    private static void deleteFromSP(Context context, Alarm alarm) {
-        SharedPreferences sp = context.getSharedPreferences(alarm.alarmName, context.MODE_PRIVATE);
-        sp.edit().clear().commit();
-
-        SharedPreferences sp1 = context.getSharedPreferences("sp_alarm", context.MODE_PRIVATE);
-        sp1.edit().remove(alarm.getAlarmName()).commit();
-    }
-
-    public static Alarm loadFromSP(Context context, String alarmName) {
-        SharedPreferences sp = context.getSharedPreferences(alarmName, context.MODE_PRIVATE);
-        int hour = sp.getInt(SP_HOUR, -1);
-        int minute = sp.getInt(SP_MINUTE, -1);
-        int repeatDate = sp.getInt(SP_REPEAT_DATE, -1);
-        boolean status = sp.getBoolean(SP_STATUS, false);
-        String ringtone = sp.getString(SP_RINGTONE_URI, null);
-
-        if (hour == -1 || minute == -1 || repeatDate == -1) {
-            sp.edit().clear().commit();
-            return null;
-        }
-
-        return new Alarm(hour, minute, repeatDate, status, ringtone, alarmName);
-
     }
 
 
