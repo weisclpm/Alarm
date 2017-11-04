@@ -10,14 +10,15 @@ import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.nfc.cardemulation.HostNfcFService;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
+import com.example.weisc.alarm.data.Alarm;
 import com.example.weisc.alarm.data.AlarmDao;
+import com.example.weisc.alarm.util.AlarmUtil;
 import com.example.weisc.alarm.util.Constant;
 
 public class AlarmService extends Service {
@@ -46,7 +47,7 @@ public class AlarmService extends Service {
         }
 
         public void cancelAlarm(Alarm alarm) {
-            PendingIntent operator = PendingIntent.getBroadcast(AlarmService.this, alarm.alarm_id,
+            PendingIntent operator = PendingIntent.getBroadcast(AlarmService.this, alarm.getId(),
                     new Intent(Constant.INTENT_ALARM_BROADCAST_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
             Log.d("ALARM", "cancelAlarm: 关闭闹钟");
             alarmManager.cancel(operator);
@@ -81,7 +82,7 @@ public class AlarmService extends Service {
 
 
     private void setAlarmInService(Alarm alarm) {
-        long time = alarm.nextTimeInMills();
+        long time = AlarmUtil.nextTimeInMills(alarm);
         Intent intent = new Intent(Constant.INTENT_ALARM_BROADCAST_ACTION);
         intent.putExtra(Constant.INTENT_ALARM_ID, alarm.getId());
         intent.putExtra(Constant.INTENT_ALARM_OPT, Constant.INTENT_OPT_SET_ALARM);
@@ -90,7 +91,7 @@ public class AlarmService extends Service {
         AlarmManager.AlarmClockInfo info =
                 new AlarmManager.AlarmClockInfo(time, null);
         alarmManager.setAlarmClock(info, operation);
-        Log.d("ALARM", "setAlarmInService: 设定闹钟 " + Alarm.timeToText(time));
+        Log.d("ALARM", "setAlarmInService: 设定闹钟 " + AlarmUtil.timeToText(time));
     }
 
     private void handleAlarm(int alarmId) {
@@ -103,7 +104,7 @@ public class AlarmService extends Service {
         ringtone.play();
 
         sendNotification();
-        if (!alarm.isOnetime()) {
+        if (!AlarmUtil.isOnetime(alarm)) {
             setAlarmInService(alarm);
         } else {
             callback.setAlarmSwitchOff(alarm);

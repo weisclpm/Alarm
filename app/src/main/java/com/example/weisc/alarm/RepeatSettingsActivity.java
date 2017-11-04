@@ -3,7 +3,6 @@ package com.example.weisc.alarm;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,8 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.weisc.alarm.Alarm;
-import com.example.weisc.alarm.R;
+import com.example.weisc.alarm.util.AlarmUtil;
 
 /**
  * Created by weisc on 17-10-16.
@@ -49,7 +47,7 @@ public class RepeatSettingsActivity extends MyBaseActivity implements AdapterVie
     }
 
     private void setListItemChecked() {
-        int[] checked = Alarm.parseRepeatDate(repeatDate);
+        int[] checked = AlarmUtil.parseRepeatDate(repeatDate);
         for (int n : checked) {
             listView.setItemChecked(n, true);
         }

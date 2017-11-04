@@ -23,6 +23,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.example.weisc.alarm.data.AlarmSettings;
+import com.example.weisc.alarm.util.AlarmUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +62,7 @@ public class SetAlarmActivity extends MyBaseActivity implements AdapterView.OnIt
 
     private List<AlarmSettings> initAlarmSettings() {
         List<AlarmSettings> list = new ArrayList<>();
-        list.add(new AlarmSettings("重复", Alarm.generateDateText(Alarm.ONETIME)));
+        list.add(new AlarmSettings("重复", AlarmUtil.generateDateText(AlarmUtil.ONETIME)));
         ringtone = RingtoneManager.
                 getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
         list.add(new AlarmSettings("铃声", updateRingtoneName(this, ringtone).toString()));
@@ -124,7 +127,7 @@ public class SetAlarmActivity extends MyBaseActivity implements AdapterView.OnIt
             case REPEAT_SETTINGS_RES:
                 if (resultCode == RESULT_OK) {
                     repeatDate = data.getIntExtra(RepeatSettingsActivity.REPEAT_DATE, 0);
-                    String repeatDateText = Alarm.generateDateText(repeatDate);
+                    String repeatDateText = AlarmUtil.generateDateText(repeatDate);
                     AlarmSettings settings = adapter.getItem(0);
                     settings.setSettingsType(repeatDateText);
                     adapter.notifyDataSetChanged();

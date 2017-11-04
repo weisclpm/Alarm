@@ -1,4 +1,4 @@
-package com.example.weisc.alarm;
+package com.example.weisc.alarm.data;
 
 import android.support.v7.app.AppCompatActivity;
 

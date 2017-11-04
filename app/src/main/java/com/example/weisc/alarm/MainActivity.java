@@ -4,14 +4,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -27,7 +25,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.weisc.alarm.data.Alarm;
 import com.example.weisc.alarm.data.AlarmDao;
+import com.example.weisc.alarm.util.AlarmUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -178,7 +178,7 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
                     adapter.add(alarm);
                     alarmServiceBinder.setAlarm(alarm, alarm.isStatus());
                     adapter.notifyDataSetChanged();
-                    Toast.makeText(this, "闹钟将在" + Alarm.timeToText(alarm.nextTimeInMills()) +
+                    Toast.makeText(this, "闹钟将在" + AlarmUtil.timeToText(AlarmUtil.nextTimeInMills(alarm)) +
                             "之后响起", Toast.LENGTH_LONG).show();
                 }
                 break;

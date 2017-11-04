@@ -1,102 +1,22 @@
-package com.example.weisc.alarm;
+package com.example.weisc.alarm.util;
 
+import com.example.weisc.alarm.data.Alarm;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Calendar;
 
 /**
- * Created by weisc on 17-10-16.
+ * Created by weisc on 17-11-4.
  */
 
-public class Alarm implements Serializable {
+public class AlarmUtil {
     public static final int ONETIME = 0;
     public static final int WORKDAY = 31;
     public static final int WEEKEND = 96;
     public static final int EVERYDAY = 127;
-
-    private static final long DAY_INTERVAL = 3600 * 24 * 1000;
-    private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
-
-    private boolean status;
-    private int hour;
-    private int minute;
-    private int repeatDate;
-    private String timeText;
-    private String repeatText;
-    private int id;
-    private String ringtone;
-
-    public int alarm_id;
-
-    public Alarm(int id, int hour, int minute, int repeatDate, boolean status, String ringtone) {
-        this.id = id;
-        setTimeText(hour, minute);
-        setRepeat(repeatDate);
-        this.status = status;
-        this.ringtone = ringtone;
-        this.alarm_id = hashCode();
-    }
-
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getRingtone() {
-        return ringtone;
-    }
-
-    public void setRingtone(String ringtone) {
-        this.ringtone = ringtone;
-    }
-
-    public int getHour() {
-        return hour;
-    }
-
-    public int getMinute() {
-        return minute;
-    }
-
-    public String getTimeText() {
-        return timeText;
-    }
-
-    private void setTimeText(int hour, int minute) {
-        this.hour = hour;
-        this.minute = minute;
-        String hourStr = hour < 10 ? "0" + Integer.toString(hour) : Integer.toString(hour);
-        String minuteStr = minute < 10 ? "0" + Integer.toString(minute) : Integer.toString(minute);
-        this.timeText = hourStr + ":" + minuteStr;
-    }
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public String getRepeatText() {
-        return repeatText;
-    }
-
     private static final String[] date = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
-
-    public void setRepeat(int repeatDate) {
-        this.repeatDate = repeatDate;
-        this.repeatText = generateDateText(repeatDate);
-    }
-
-    public int getRepeatDate() {
-        return repeatDate;
-    }
+    public static final long DAY_INTERVAL = 3600 * 24 * 1000;
+    private static final long WEEK_INTERVAL = 7 * DAY_INTERVAL;
 
     public static String generateDateText(int repeatDate) {
         StringBuilder sb = new StringBuilder();
@@ -124,10 +44,6 @@ public class Alarm implements Serializable {
         return sb.toString();
     }
 
-    public boolean isOnetime() {
-        return repeatDate == ONETIME;
-    }
-
     public static int[] parseRepeatDate(int repeatDate) {
         int repeat_copy = repeatDate;
         int n = 0, index = 0;
@@ -141,11 +57,6 @@ public class Alarm implements Serializable {
         }
         return Arrays.copyOf(repeatDay, index);
     }
-
-    public long nextTimeInMills() {
-        return calculate(hour, minute, repeatDate);
-    }
-
 
     public static String timeToText(long time) {
         Calendar current = Calendar.getInstance();
@@ -183,8 +94,15 @@ public class Alarm implements Serializable {
 
     }
 
+    public static boolean isOnetime(Alarm alarm) {
+        return alarm.getRepeatDate() == ONETIME;
+    }
 
-    private long calculate(int hour, int minute, int repeatDate) {
+    public static long nextTimeInMills(Alarm alarm) {
+        return calculate(alarm.getHour(), alarm.getMinute(), alarm.getRepeatDate());
+    }
+
+    private static long calculate(int hour, int minute, int repeatDate) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
@@ -197,10 +115,10 @@ public class Alarm implements Serializable {
             dateTime = dateTime + DAY_INTERVAL;
             curWeek++;
         }
-        if (repeatDate == Alarm.EVERYDAY || repeatDate == Alarm.ONETIME) {
+        if (repeatDate == EVERYDAY || repeatDate == ONETIME) {
             return dateTime;
         } else {
-            int[] repeatDay = Alarm.parseRepeatDate(repeatDate);
+            int[] repeatDay = parseRepeatDate(repeatDate);
             int dayOfWeek = findNextDay(repeatDay, curWeek);
             if (dayOfWeek > curWeek) {
                 dateTime = dateTime + (dayOfWeek - curWeek) * DAY_INTERVAL;
@@ -211,7 +129,7 @@ public class Alarm implements Serializable {
         }
     }
 
-    private int findNextDay(int[] repeatDay, int curWeek) {
+    private static int findNextDay(int[] repeatDay, int curWeek) {
         int high = repeatDay.length - 1;
         if (curWeek > repeatDay[high]) return repeatDay[0];
         else {

@@ -3,8 +3,6 @@ package com.example.weisc.alarm.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.weisc.alarm.Alarm;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
