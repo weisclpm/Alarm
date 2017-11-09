@@ -63,7 +63,7 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
 
     private void initAlarmService() {
         Intent service = new Intent(this, AlarmService.class);
-        startService(service);
+//        startService(service);
         ServiceConnection conn = new AlarmServiceConnection();
         bindService(service, conn, BIND_AUTO_CREATE);
     }

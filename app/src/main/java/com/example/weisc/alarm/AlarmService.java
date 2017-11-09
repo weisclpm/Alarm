@@ -14,6 +14,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.annotation.IntDef;
 import android.util.Log;
 
 import com.example.weisc.alarm.data.Alarm;
@@ -29,8 +30,6 @@ public class AlarmService extends Service {
     private Ringtone ringtone;
 
     private ActivityCallback callback;
-
-    private static Handler mHandler;
 
     interface ActivityCallback {
         void setAlarmSwitchOff(Alarm alarm);
@@ -61,7 +60,27 @@ public class AlarmService extends Service {
     @Override
     public void onCreate() {
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        mHandler = new AlarmServiceHandler();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int opt = intent.getIntExtra(Constant.INTENT_ALARM_OPT, -1);
+        Log.d("ALARM", "onStartCommand: service opt " + opt);
+        switch (opt) {
+            case Constant.INTENT_OPT_SET_ALARM: {
+                int alarmId = intent.getIntExtra(Constant.INTENT_ALARM_ID, -1);
+                handleAlarm(alarmId);
+                break;
+            }
+            case Constant.INTENT_OPT_STOP_NOTIFY: {
+                stopNotify();
+                break;
+            }
+            case -1:
+                Log.d("ALARM", "onStartCommand: undefined service operation ");
+                break;
+        }
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -73,13 +92,6 @@ public class AlarmService extends Service {
     public IBinder onBind(Intent intent) {
         return binder;
     }
-
-    public static Handler getHandler() {
-        if (mHandler == null) {
-        }
-        return mHandler;
-    }
-
 
     private void setAlarmInService(Alarm alarm) {
         long time = AlarmUtil.nextTimeInMills(alarm);
