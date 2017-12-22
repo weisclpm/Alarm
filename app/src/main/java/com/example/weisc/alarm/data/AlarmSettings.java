@@ -1,4 +1,4 @@
-package com.example.weisc.alarm;
+package com.example.weisc.alarm.data;
 
 import android.support.v7.app.AppCompatActivity;
 
@@ -9,7 +9,7 @@ import java.util.Map;
  * Created by weisc on 17-10-17.
  */
 
-public class AlarmSettings extends AppCompatActivity {
+public class AlarmSettings{
     private String settingsName;
     private String settingsType;
 

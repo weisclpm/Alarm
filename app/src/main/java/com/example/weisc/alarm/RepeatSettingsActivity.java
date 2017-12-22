@@ -1,9 +1,8 @@
-package com.example.weisc.settings;
+package com.example.weisc.alarm;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,14 +12,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.weisc.alarm.Alarm;
-import com.example.weisc.alarm.R;
+import com.example.weisc.alarm.util.AlarmUtil;
 
 /**
  * Created by weisc on 17-10-16.
  */
 
-public class RepeatSettings extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class RepeatSettingsActivity extends MyBaseActivity implements AdapterView.OnItemClickListener {
     public static final String REPEAT_DATE = "REPEAT_DATE";
     private static final String[] items = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
     private int repeatDate;
@@ -49,7 +47,7 @@ public class RepeatSettings extends AppCompatActivity implements AdapterView.OnI
     }
 
     private void setListItemChecked() {
-        int[] checked = Alarm.parseRepeatDate(repeatDate);
+        int[] checked = AlarmUtil.parseRepeatDate(repeatDate);
         for (int n : checked) {
             listView.setItemChecked(n, true);
         }

@@ -1,40 +1,40 @@
-package com.example.weisc.services;
+package com.example.weisc.alarm;
 
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.support.annotation.IntDef;
 import android.util.Log;
 
-import com.example.weisc.alarm.Alarm;
+import com.example.weisc.alarm.data.Alarm;
+import com.example.weisc.alarm.data.AlarmDao;
+import com.example.weisc.alarm.util.AlarmUtil;
+import com.example.weisc.alarm.util.Constant;
 
 public class AlarmService extends Service {
-    public static final String INTENT_ALARM_ACTION = "com.weisc.alarm";
-    public static final String INTENT_ALARM_NAME = "alarm_data";
-    public static final String INTENT_ALARM_OPT = "alarm_opt";
-    public static final int INTENT_OPT_SET_ALARM = 0;
-    public static final int INTENT_OPT_STOP_NOTIFY = 1;
     private AlarmManager alarmManager;
-    private AlarmBroadcastReceiver receiver;
 
     private AlarmServiceBinder binder = new AlarmServiceBinder();
-    private ActivityCallBack callback;
 
     private Ringtone ringtone;
 
-    public interface ActivityCallBack {
+    private ActivityCallback callback;
+
+    interface ActivityCallback {
         void setAlarmSwitchOff(Alarm alarm);
     }
+
 
     public class AlarmServiceBinder extends Binder {
         public void setAlarm(Alarm alarm, boolean flag) {
@@ -46,13 +46,13 @@ public class AlarmService extends Service {
         }
 
         public void cancelAlarm(Alarm alarm) {
-            PendingIntent operator = PendingIntent.getBroadcast(AlarmService.this, alarm.alarm_id,
-                    new Intent(INTENT_ALARM_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent operator = PendingIntent.getBroadcast(AlarmService.this, alarm.getId(),
+                    new Intent(Constant.INTENT_ALARM_BROADCAST_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
             Log.d("ALARM", "cancelAlarm: 关闭闹钟");
             alarmManager.cancel(operator);
         }
 
-        public void setActivityCallBack(ActivityCallBack ck) {
+        public void setActivityCallBack(ActivityCallback ck) {
             callback = ck;
         }
     }
@@ -60,16 +60,32 @@ public class AlarmService extends Service {
     @Override
     public void onCreate() {
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(INTENT_ALARM_ACTION);
-        receiver = new AlarmBroadcastReceiver();
-        registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int opt = intent.getIntExtra(Constant.INTENT_ALARM_OPT, -1);
+        Log.d("ALARM", "onStartCommand: service opt " + opt);
+        switch (opt) {
+            case Constant.INTENT_OPT_SET_ALARM: {
+                int alarmId = intent.getIntExtra(Constant.INTENT_ALARM_ID, -1);
+                handleAlarm(alarmId);
+                break;
+            }
+            case Constant.INTENT_OPT_STOP_NOTIFY: {
+                stopNotify();
+                break;
+            }
+            case -1:
+                Log.d("ALARM", "onStartCommand: undefined service operation ");
+                break;
+        }
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(receiver);
     }
 
     @Override
@@ -77,23 +93,22 @@ public class AlarmService extends Service {
         return binder;
     }
 
-
     private void setAlarmInService(Alarm alarm) {
-        long time = alarm.nextTimeInMills();
-        Intent intent = new Intent(INTENT_ALARM_ACTION);
-        intent.putExtra(INTENT_ALARM_NAME, alarm.getAlarmName());
-        intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_SET_ALARM);
+        long time = AlarmUtil.nextTimeInMills(alarm);
+        Intent intent = new Intent(Constant.INTENT_ALARM_BROADCAST_ACTION);
+        intent.putExtra(Constant.INTENT_ALARM_ID, alarm.getId());
+        intent.putExtra(Constant.INTENT_ALARM_OPT, Constant.INTENT_OPT_SET_ALARM);
         PendingIntent operation = PendingIntent.
-                getBroadcast(this, alarm.alarm_id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                getBroadcast(this, alarm.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager.AlarmClockInfo info =
                 new AlarmManager.AlarmClockInfo(time, null);
         alarmManager.setAlarmClock(info, operation);
-        Log.d("ALARM", "setAlarmInService: 设定闹钟 " + Alarm.timeToText(time));
+        Log.d("ALARM", "setAlarmInService: 设定闹钟 " + AlarmUtil.timeToText(time));
     }
 
-    private void handleAlarm(String alarmName) {
+    private void handleAlarm(int alarmId) {
 
-        Alarm alarm = Alarm.loadFromSP(this, alarmName);
+        Alarm alarm = AlarmDao.loadAlarm(this, alarmId);
         String ringtoneStr = alarm.getRingtone();
         Uri ringtoneUri = ringtoneStr == null ? null : Uri.parse(ringtoneStr);
         if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
@@ -101,7 +116,7 @@ public class AlarmService extends Service {
         ringtone.play();
 
         sendNotification();
-        if (!alarm.isOnetime()) {
+        if (!AlarmUtil.isOnetime(alarm)) {
             setAlarmInService(alarm);
         } else {
             callback.setAlarmSwitchOff(alarm);
@@ -122,8 +137,8 @@ public class AlarmService extends Service {
                 .setAutoCancel(false).setFullScreenIntent(pendingIntent, true);
 
         //停止动作
-        Intent intent = new Intent(INTENT_ALARM_ACTION);
-        intent.putExtra(INTENT_ALARM_OPT, INTENT_OPT_STOP_NOTIFY);
+        Intent intent = new Intent(Constant.INTENT_ALARM_BROADCAST_ACTION);
+        intent.putExtra(Constant.INTENT_ALARM_OPT, Constant.INTENT_OPT_STOP_NOTIFY);
         PendingIntent dismissOperation = PendingIntent.getBroadcast
                 (this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         Notification.Action.Builder dismiss =
@@ -144,31 +159,21 @@ public class AlarmService extends Service {
         manager.cancel(0);
     }
 
-
-    public class AlarmBroadcastReceiver extends BroadcastReceiver {
+    private class AlarmServiceHandler extends Handler {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            int opt = intent.getIntExtra(INTENT_ALARM_OPT, -1);
-            Log.d("ALARM", "onReceive: broadcast receive opt " + opt);
-            switch (opt) {
-                case INTENT_OPT_SET_ALARM: {
-                    String alarmName = intent.getStringExtra(INTENT_ALARM_NAME);
-                    if (alarmName != null) {
-                        handleAlarm(alarmName);
-                    }
+        public void handleMessage(Message msg) {
+            int what = msg.what;
+            switch (what) {
+                case Constant.MSG_WHAT_HANDLE_ALARM:
+                    int alarmId = msg.arg1;
+                    handleAlarm(alarmId);
                     break;
-                }
-                case INTENT_OPT_STOP_NOTIFY: {
+
+                case Constant.MSG_WHAT_STOP_NOTIFY:
                     stopNotify();
                     break;
-                }
-                case -1:
-                    Log.d("ALARM", "onReceive: 获取不到值，未知广播 ");
-                    break;
             }
-
         }
     }
-
 
 }

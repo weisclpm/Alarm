@@ -3,7 +3,6 @@ package com.example.weisc.alarm;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -12,9 +11,7 @@ import android.provider.OpenableColumns;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,15 +23,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.example.weisc.settings.RepeatSettings;
+import com.example.weisc.alarm.data.AlarmSettings;
+import com.example.weisc.alarm.util.AlarmUtil;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SetAlarmActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class SetAlarmActivity extends MyBaseActivity implements AdapterView.OnItemClickListener {
     public static final String INTENT_ALARM_DATA_HOUR = "INTENT_ALARM_DATA_HOUR";
     public static final String INTENT_ALARM_DATA_REPEAT = "INTENT_ALARM_DATA_REPEAT";
     public static final String INTENT_ALARM_DATA_MINUTE = "INTENT_ALARM_DATA_MINUTE";
@@ -67,7 +62,7 @@ public class SetAlarmActivity extends AppCompatActivity implements AdapterView.O
 
     private List<AlarmSettings> initAlarmSettings() {
         List<AlarmSettings> list = new ArrayList<>();
-        list.add(new AlarmSettings("重复", Alarm.generateDateText(Alarm.ONETIME)));
+        list.add(new AlarmSettings("重复", AlarmUtil.generateDateText(AlarmUtil.ONETIME)));
         ringtone = RingtoneManager.
                 getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
         list.add(new AlarmSettings("铃声", updateRingtoneName(this, ringtone).toString()));
@@ -78,9 +73,9 @@ public class SetAlarmActivity extends AppCompatActivity implements AdapterView.O
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         switch (position) {
             case 0: {
-                Intent intent = new Intent(this, RepeatSettings.class);
+                Intent intent = new Intent(this, RepeatSettingsActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putInt(RepeatSettings.REPEAT_DATE, repeatDate);
+                bundle.putInt(RepeatSettingsActivity.REPEAT_DATE, repeatDate);
                 intent.putExtras(bundle);
                 startActivityForResult(intent, REPEAT_SETTINGS_RES);
                 break;
@@ -125,21 +120,14 @@ public class SetAlarmActivity extends AppCompatActivity implements AdapterView.O
         return true;
     }
 
-//    private void saveAlarm(Alarm alarm) {
-//        SharedPreferences sp = getSharedPreferences("sp_alarm", MODE_PRIVATE);
-//        String alarmName = alarm.getAlarmName();
-//        sp.edit().putString(alarmName, alarmName).commit();
-//        Alarm.saveToSP(this, alarm);
-//    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         switch (requestCode) {
             case REPEAT_SETTINGS_RES:
                 if (resultCode == RESULT_OK) {
-                    repeatDate = data.getIntExtra(RepeatSettings.REPEAT_DATE, 0);
-                    String repeatDateText = Alarm.generateDateText(repeatDate);
+                    repeatDate = data.getIntExtra(RepeatSettingsActivity.REPEAT_DATE, 0);
+                    String repeatDateText = AlarmUtil.generateDateText(repeatDate);
                     AlarmSettings settings = adapter.getItem(0);
                     settings.setSettingsType(repeatDateText);
                     adapter.notifyDataSetChanged();
