@@ -1,9 +1,7 @@
-package com.example.weisc.alarm;
+package com.weisc.alarm;
 
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 
 public class MyBaseActivity extends AppCompatActivity {
 

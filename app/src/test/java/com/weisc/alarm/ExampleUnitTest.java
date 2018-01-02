@@ -1,4 +1,4 @@
-package com.example.weisc.alarm;
+package com.weisc.alarm;
 
 import org.junit.Test;
 

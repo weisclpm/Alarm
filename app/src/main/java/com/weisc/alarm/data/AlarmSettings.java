@@ -1,9 +1,4 @@
-package com.example.weisc.alarm.data;
-
-import android.support.v7.app.AppCompatActivity;
-
-import java.util.HashMap;
-import java.util.Map;
+package com.weisc.alarm.data;
 
 /**
  * Created by weisc on 17-10-17.

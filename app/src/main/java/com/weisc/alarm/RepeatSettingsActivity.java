@@ -1,4 +1,4 @@
-package com.example.weisc.alarm;
+package com.weisc.alarm;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.weisc.alarm.util.AlarmUtil;
+import com.weisc.alarm.util.AlarmUtil;
 
 /**
  * Created by weisc on 17-10-16.

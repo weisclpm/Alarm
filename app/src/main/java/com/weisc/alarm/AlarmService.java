@@ -1,4 +1,4 @@
-package com.example.weisc.alarm;
+package com.weisc.alarm;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -14,13 +14,12 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.annotation.IntDef;
 import android.util.Log;
 
-import com.example.weisc.alarm.data.Alarm;
-import com.example.weisc.alarm.data.AlarmDao;
-import com.example.weisc.alarm.util.AlarmUtil;
-import com.example.weisc.alarm.util.Constant;
+import com.weisc.alarm.data.Alarm;
+import com.weisc.alarm.data.AlarmDao;
+import com.weisc.alarm.util.AlarmUtil;
+import com.weisc.alarm.util.Constant;
 
 public class AlarmService extends Service {
     private AlarmManager alarmManager;

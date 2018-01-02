@@ -1,11 +1,11 @@
-package com.example.weisc.alarm;
+package com.weisc.alarm;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.example.weisc.alarm.util.Constant;
+import com.weisc.alarm.util.Constant;
 
 
 public class AlarmBroadcastReceiver extends BroadcastReceiver {

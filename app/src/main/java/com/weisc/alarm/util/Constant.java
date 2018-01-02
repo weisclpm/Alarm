@@ -1,4 +1,4 @@
-package com.example.weisc.alarm.util;
+package com.weisc.alarm.util;
 
 /**
  * Created by weisc on 17-11-3.

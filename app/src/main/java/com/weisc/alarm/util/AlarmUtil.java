@@ -1,6 +1,6 @@
-package com.example.weisc.alarm.util;
+package com.weisc.alarm.util;
 
-import com.example.weisc.alarm.data.Alarm;
+import com.weisc.alarm.data.Alarm;
 
 import java.util.Arrays;
 import java.util.Calendar;

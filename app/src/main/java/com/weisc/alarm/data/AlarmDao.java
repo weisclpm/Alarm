@@ -1,4 +1,4 @@
-package com.example.weisc.alarm.data;
+package com.weisc.alarm.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;

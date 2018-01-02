@@ -1,7 +1,7 @@
-package com.example.weisc.alarm.data;
+package com.weisc.alarm.data;
 
 
-import com.example.weisc.alarm.util.AlarmUtil;
+import com.weisc.alarm.util.AlarmUtil;
 
 import java.io.Serializable;
 

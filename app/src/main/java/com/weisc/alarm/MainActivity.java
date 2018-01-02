@@ -1,4 +1,4 @@
-package com.example.weisc.alarm;
+package com.weisc.alarm;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,9 +25,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.weisc.alarm.data.Alarm;
-import com.example.weisc.alarm.data.AlarmDao;
-import com.example.weisc.alarm.util.AlarmUtil;
+import com.weisc.alarm.data.Alarm;
+import com.weisc.alarm.data.AlarmDao;
+import com.weisc.alarm.util.AlarmUtil;
 
 import java.util.ArrayList;
 import java.util.List;
