@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -144,12 +145,12 @@ public class SetAlarmActivity extends MyBaseActivity implements AdapterView.OnIt
     }
 
     private class AlarmSettingsAdapter extends ArrayAdapter<AlarmSettings> {
-        int resource;
+        int mResource;
 
         public AlarmSettingsAdapter(@NonNull Context context, @LayoutRes int resource,
                                     @NonNull List<AlarmSettings> objects) {
             super(context, resource, objects);
-            this.resource = resource;
+            this.mResource = resource;
         }
 
         @NonNull
@@ -159,7 +160,7 @@ public class SetAlarmActivity extends MyBaseActivity implements AdapterView.OnIt
             AlarmSettingsViewHolder viewHolder;
             View view;
             if (convertView == null) {
-                view = getLayoutInflater().from(getContext()).inflate(resource, parent, false);
+                view = getLayoutInflater().from(getContext()).inflate(mResource, parent, false);
                 viewHolder = new AlarmSettingsViewHolder();
                 viewHolder.alarmSettingsName = view.findViewById(R.id.alarmSettingsName);
                 viewHolder.alarmSettingsType = view.findViewById(R.id.alarmSettingsType);

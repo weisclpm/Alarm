@@ -11,7 +11,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -54,6 +57,7 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
         alarmListView = (ListView) findViewById(R.id.alarmList);
         adapter = new AlarmAdapter(this, R.layout.alarm_item, alarmList);
         alarmListView.setAdapter(adapter);
+        alarmListView.setOnItemClickListener(mItemListener);
         registerForContextMenu(alarmListView);
         addAlarm = (FloatingActionButton) findViewById(R.id.addAlarm);
         addAlarm.setOnClickListener(this);
@@ -234,6 +238,8 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
             final Alarm alarm = getItem(position);
             View view;
             ViewHolder viewHolder;
+            ViewGroup groupView;
+
             if (convertView == null) {
                 view = getLayoutInflater().from(getContext()).inflate(resource, parent, false);
                 viewHolder = new ViewHolder();
@@ -245,7 +251,7 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
                 view = convertView;
                 viewHolder = (ViewHolder) view.getTag();
             }
-
+            groupView = (ViewGroup) view;
             viewHolder.alarmTimeText.setText(alarm.getTimeText());
             viewHolder.aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -256,6 +262,7 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
                     }
                 }
             });
+
             viewHolder.aSwitch.setChecked(alarm.isStatus());
             viewHolder.repeatDate.setText(alarm.getRepeatText());
             return view;
@@ -267,6 +274,30 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
             TextView repeatDate;
         }
     }
+
+    private final AdapterView.OnItemClickListener mItemListener = new AdapterView.OnItemClickListener() {
+        SparseBooleanArray mBtnSparse = new SparseBooleanArray();
+        private View view;
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            ViewGroup group = (ViewGroup) view;
+            if (mBtnSparse.get(position)) {
+                group.removeView(getView());
+                mBtnSparse.put(position, false);
+            } else {
+                group.addView(getView());
+                mBtnSparse.put(position, true);
+            }
+        }
+
+        private View getView() {
+            if (view == null) {
+                view = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_create_alarm, null);
+            }
+            return view;
+        }
+    };
 
 
 }

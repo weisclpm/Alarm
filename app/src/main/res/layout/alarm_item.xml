@@ -4,44 +4,52 @@
     android:layout_height="match_parent"
     android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
     android:layout_marginVertical="@dimen/activity_vertical_margin"
-    android:orientation="horizontal"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical"
     android:paddingHorizontal="@dimen/layout_horizontal_padding"
     android:paddingVertical="@dimen/layout_vertical_padding"
-    android:descendantFocusability="blocksDescendants"
     android:weightSum="1">
 
     <LinearLayout
-        android:layout_width="281dp"
-        android:layout_height="78dp"
-        android:layout_gravity="center"
-        android:gravity="left|center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/alarmTimeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textSize="100px" />
-
-        <TextView
-            android:id="@+id/alarmRepeat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:gravity="start|bottom"
-            android:text="TextView"
-            android:textSize="45px" />
-
-    </LinearLayout>
-
-
-    <Switch
-        android:id="@+id/alarmSwitch"
-        android:focusable="false"
+        android:id="@+id/alarm_item_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|right" />
+        android:orientation="horizontal">
 
+        <LinearLayout
+            android:layout_width="281dp"
+            android:layout_height="78dp"
+            android:layout_gravity="center"
+            android:gravity="left|center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/alarmTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textSize="100px" />
+
+            <TextView
+                android:id="@+id/alarmRepeat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:gravity="start|bottom"
+                android:text="TextView"
+                android:textSize="45px" />
+
+        </LinearLayout>
+
+
+        <Switch
+            android:id="@+id/alarmSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|right"
+            android:focusable="false" />
+
+    </LinearLayout>
+    >
 
 </LinearLayout>
