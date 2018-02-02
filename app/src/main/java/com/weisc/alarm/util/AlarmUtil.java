@@ -1,5 +1,12 @@
 package com.weisc.alarm.util;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
+
 import com.weisc.alarm.data.Alarm;
 
 import java.util.Arrays;
@@ -137,5 +144,42 @@ public class AlarmUtil {
             if (high != -1 && repeatDay[high] == curWeek) return curWeek;
             else return repeatDay[(high + 1) % repeatDay.length];
         }
+    }
+
+
+    //获取铃声的名称
+    public static CharSequence updateRingtoneName(Context context, Uri ringtoneUri) {
+        if (context == null) {
+            return null;
+        }
+        CharSequence summary = "";
+        // Is it a silent ringtone?
+        if (ringtoneUri == null) {
+            summary = "静音";
+        } else {
+            Cursor cursor = null;
+            try {
+                if (MediaStore.AUTHORITY.equals(ringtoneUri.getAuthority())) {
+                    // Fetch the ringtone title from the media provider
+                    cursor = context.getContentResolver().query(ringtoneUri,
+                            new String[]{MediaStore.Audio.Media.TITLE}, null, null, null);
+                } else if (ContentResolver.SCHEME_CONTENT.equals(ringtoneUri.getScheme())) {
+                    cursor = context.getContentResolver().query(ringtoneUri,
+                            new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
+                }
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        summary = cursor.getString(0);
+                    }
+                }
+            } catch (IllegalArgumentException iae) {
+                // Some other error retrieving the column from the provider
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+        return summary;
     }
 }

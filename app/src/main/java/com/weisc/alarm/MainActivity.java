@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -238,7 +237,6 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
             final Alarm alarm = getItem(position);
             View view;
             ViewHolder viewHolder;
-            ViewGroup groupView;
 
             if (convertView == null) {
                 view = getLayoutInflater().from(getContext()).inflate(resource, parent, false);
@@ -251,7 +249,6 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
                 view = convertView;
                 viewHolder = (ViewHolder) view.getTag();
             }
-            groupView = (ViewGroup) view;
             viewHolder.alarmTimeText.setText(alarm.getTimeText());
             viewHolder.aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -276,26 +273,33 @@ public class MainActivity extends MyBaseActivity implements View.OnClickListener
     }
 
     private final AdapterView.OnItemClickListener mItemListener = new AdapterView.OnItemClickListener() {
-        SparseBooleanArray mBtnSparse = new SparseBooleanArray();
-        private View view;
+        SparseBooleanArray mShowItems = new SparseBooleanArray();
+        private View settingsView;
 
+        /**
+         *  点击列表项时，显示或者隐藏设置项。
+         */
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            ViewGroup group = (ViewGroup) view;
-            if (mBtnSparse.get(position)) {
-                group.removeView(getView());
-                mBtnSparse.put(position, false);
+            showOrHide(view, position);
+        }
+
+        private void showOrHide(View view, int position) {
+            ViewGroup itemView = (ViewGroup) view;
+            if (mShowItems.get(position)) {
+                itemView.removeView(getSettingsView());
+                mShowItems.put(position, false);
             } else {
-                group.addView(getView());
-                mBtnSparse.put(position, true);
+                itemView.addView(getSettingsView());
+                mShowItems.put(position, true);
             }
         }
 
-        private View getView() {
-            if (view == null) {
-                view = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_create_alarm, null);
+        private View getSettingsView() {
+            if (settingsView == null) {
+                settingsView = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_create_alarm, null);
             }
-            return view;
+            return settingsView;
         }
     };
 

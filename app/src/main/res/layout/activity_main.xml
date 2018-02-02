@@ -17,14 +17,14 @@
         <ListView
             android:id="@+id/alarmList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:longClickable="true"
             android:paddingTop="0dp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#FFC2BFBF"></View>
+            android:background="#FFC2BFBF"/>
     </LinearLayout>
 
 
