@@ -66,7 +66,7 @@ public class SetAlarmActivity extends BaseActivity implements AdapterView.OnItem
     }
 
     @Override
-    public int menuResId() {
+    public int OptionsMenuResId() {
         return R.menu.menu;
     }
 

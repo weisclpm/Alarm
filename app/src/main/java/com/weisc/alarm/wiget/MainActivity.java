@@ -77,7 +77,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     @Override
-    public int menuResId() {
+    public int OptionsMenuResId() {
         return R.menu.main_activity_menu;
     }
 

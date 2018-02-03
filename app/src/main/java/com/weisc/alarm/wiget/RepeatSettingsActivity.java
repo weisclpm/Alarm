@@ -51,7 +51,7 @@ public class RepeatSettingsActivity extends BaseActivity implements AdapterView.
     }
 
     @Override
-    public int menuResId() {
+    public int OptionsMenuResId() {
         return R.menu.menu;
     }
 

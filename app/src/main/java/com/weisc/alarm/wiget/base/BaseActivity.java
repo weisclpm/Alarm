@@ -25,13 +25,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     public abstract int layoutResId();
 
     @MenuRes
-    public int menuResId() {
+    public int OptionsMenuResId() {
         return 0;
     }
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
-        if (menuResId() != 0) {
-            getMenuInflater().inflate(menuResId(), menu);
+        if (OptionsMenuResId() != 0) {
+            getMenuInflater().inflate(OptionsMenuResId(), menu);
         }
         return super.onCreateOptionsMenu(menu);
     }
