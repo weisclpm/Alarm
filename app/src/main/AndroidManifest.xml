@@ -24,12 +24,12 @@
         <activity android:name=".wiget.RepeatSettingsActivity" />
 
         <service
-            android:name=".wiget.AlarmService"
+            android:name=".service.AlarmService"
             android:enabled="true"
             android:exported="true" />
 
         <receiver
-            android:name=".wiget.AlarmBroadcastReceiver"
+            android:name=".broadcast.AlarmBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

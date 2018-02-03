@@ -1,10 +1,11 @@
-package com.weisc.alarm.wiget;
+package com.weisc.alarm.broadcast;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.weisc.alarm.service.AlarmService;
 import com.weisc.alarm.util.Constant;
 
 

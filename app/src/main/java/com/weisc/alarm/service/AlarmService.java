@@ -1,4 +1,4 @@
-package com.weisc.alarm.wiget;
+package com.weisc.alarm.service;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -30,7 +30,7 @@ public class AlarmService extends Service {
 
     private ActivityCallback callback;
 
-    interface ActivityCallback {
+    public interface ActivityCallback {
         void setAlarmSwitchOff(Alarm alarm);
     }
 
@@ -158,21 +158,21 @@ public class AlarmService extends Service {
         manager.cancel(0);
     }
 
-    private class AlarmServiceHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            int what = msg.what;
-            switch (what) {
-                case Constant.MSG_WHAT_HANDLE_ALARM:
-                    int alarmId = msg.arg1;
-                    handleAlarm(alarmId);
-                    break;
-
-                case Constant.MSG_WHAT_STOP_NOTIFY:
-                    stopNotify();
-                    break;
-            }
-        }
-    }
+//    private class AlarmServiceHandler extends Handler {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            int what = msg.what;
+//            switch (what) {
+//                case Constant.MSG_WHAT_HANDLE_ALARM:
+//                    int alarmId = msg.arg1;
+//                    handleAlarm(alarmId);
+//                    break;
+//
+//                case Constant.MSG_WHAT_STOP_NOTIFY:
+//                    stopNotify();
+//                    break;
+//            }
+//        }
+//    }
 
 }
