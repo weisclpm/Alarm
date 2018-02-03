@@ -53,7 +53,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);
         initAlarmService();
         initAlarmList();
         alarmListView = (ListView) findViewById(R.id.alarmList);
@@ -64,8 +64,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         addAlarm = (FloatingActionButton) findViewById(R.id.addAlarm);
         addAlarm.setOnClickListener(this);
 
-        super.onCreate(savedInstanceState);
     }
+
+    @Override
+    public void initializePresenter() {
+        mPresenter = new MainPresenter(this);
+    }
+
+    @Override
+    public int layoutResId() {
+        return R.layout.activity_main;
+    }
+
+    @Override
+    public int menuResId() {
+        return R.menu.main_activity_menu;
+    }
+
 
     private void initAlarmService() {
         Intent service = new Intent(this, AlarmService.class);
@@ -112,13 +127,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             //退出
             finish();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_activity_menu, menu);
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

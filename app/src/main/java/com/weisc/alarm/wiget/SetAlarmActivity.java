@@ -49,8 +49,6 @@ public class SetAlarmActivity extends BaseActivity implements AdapterView.OnItem
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_alarm);
-
 
         timePicker = (TimePicker) findViewById(R.id.timePicker);
         timePicker.setIs24HourView(true);
@@ -60,6 +58,22 @@ public class SetAlarmActivity extends BaseActivity implements AdapterView.OnItem
                 initAlarmSettings());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void initializePresenter() {
+
+    }
+
+    @Override
+    public int menuResId() {
+        return R.menu.menu;
+    }
+
+
+    @Override
+    public int layoutResId() {
+        return R.layout.activity_create_alarm;
     }
 
     private List<AlarmSettings> initAlarmSettings() {
@@ -94,12 +108,6 @@ public class SetAlarmActivity extends BaseActivity implements AdapterView.OnItem
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu, menu);
-        return true;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

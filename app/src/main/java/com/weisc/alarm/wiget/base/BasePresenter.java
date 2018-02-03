@@ -7,5 +7,13 @@ package com.weisc.alarm.wiget.base;
  * Change List:
  */
 
-public class BasePresenter {
+public class BasePresenter<V extends BaseView> {
+
+    private V mBaseView;
+
+    public BasePresenter(V baseView) {
+        this.mBaseView = baseView;
+    }
+
+
 }

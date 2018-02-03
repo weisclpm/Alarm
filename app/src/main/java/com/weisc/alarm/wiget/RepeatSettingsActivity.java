@@ -31,7 +31,6 @@ public class RepeatSettingsActivity extends BaseActivity implements AdapterView.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.base_listview);
         Intent intent = getIntent();
         repeatDate = intent.getIntExtra(REPEAT_DATE, 0);
 
@@ -39,6 +38,21 @@ public class RepeatSettingsActivity extends BaseActivity implements AdapterView.
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, items));
         listView.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void initializePresenter() {
+
+    }
+
+    @Override
+    public int layoutResId() {
+        return R.layout.base_listview;
+    }
+
+    @Override
+    public int menuResId() {
+        return R.menu.menu;
     }
 
     @Override
@@ -65,13 +79,6 @@ public class RepeatSettingsActivity extends BaseActivity implements AdapterView.
         }
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
