@@ -1,4 +1,4 @@
-package com.weisc.alarm;
+package com.weisc.alarm.wiget;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,16 +27,18 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.weisc.alarm.R;
 import com.weisc.alarm.data.Alarm;
 import com.weisc.alarm.data.AlarmDao;
 import com.weisc.alarm.util.AlarmUtil;
+import com.weisc.alarm.wiget.base.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends MyBaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int CREATE_ALARM = 1;
 
     private boolean isExit;

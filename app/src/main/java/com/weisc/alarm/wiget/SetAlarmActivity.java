@@ -1,4 +1,4 @@
-package com.weisc.alarm;
+package com.weisc.alarm.wiget;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -19,18 +19,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.weisc.alarm.R;
 import com.weisc.alarm.data.AlarmSettings;
 import com.weisc.alarm.util.AlarmUtil;
+import com.weisc.alarm.wiget.base.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SetAlarmActivity extends MyBaseActivity implements AdapterView.OnItemClickListener {
+public class SetAlarmActivity extends BaseActivity implements AdapterView.OnItemClickListener {
     public static final String INTENT_ALARM_DATA_HOUR = "INTENT_ALARM_DATA_HOUR";
     public static final String INTENT_ALARM_DATA_REPEAT = "INTENT_ALARM_DATA_REPEAT";
     public static final String INTENT_ALARM_DATA_MINUTE = "INTENT_ALARM_DATA_MINUTE";

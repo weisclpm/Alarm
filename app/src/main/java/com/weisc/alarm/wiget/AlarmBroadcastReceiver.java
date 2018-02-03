@@ -1,4 +1,4 @@
-package com.weisc.alarm;
+package com.weisc.alarm.wiget;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

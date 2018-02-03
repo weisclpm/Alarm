@@ -1,15 +1,11 @@
-package com.weisc.alarm;
+package com.weisc.alarm.wiget;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.weisc.alarm.R;
 import com.weisc.alarm.data.AlarmSettings;
 import com.weisc.alarm.util.AlarmUtil;
 import com.weisc.alarm.util.Constant;

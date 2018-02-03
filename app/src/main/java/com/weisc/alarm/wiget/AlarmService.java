@@ -1,4 +1,4 @@
-package com.weisc.alarm;
+package com.weisc.alarm.wiget;
 
 import android.app.AlarmManager;
 import android.app.Notification;

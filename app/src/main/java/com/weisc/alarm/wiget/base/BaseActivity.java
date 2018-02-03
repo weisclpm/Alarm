@@ -1,9 +1,9 @@
-package com.weisc.alarm;
+package com.weisc.alarm.wiget.base;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class MyBaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

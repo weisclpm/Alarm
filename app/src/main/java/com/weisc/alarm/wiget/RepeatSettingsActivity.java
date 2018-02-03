@@ -1,4 +1,4 @@
-package com.weisc.alarm;
+package com.weisc.alarm.wiget;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,13 +12,15 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.weisc.alarm.R;
 import com.weisc.alarm.util.AlarmUtil;
+import com.weisc.alarm.wiget.base.BaseActivity;
 
 /**
  * Created by weisc on 17-10-16.
  */
 
-public class RepeatSettingsActivity extends MyBaseActivity implements AdapterView.OnItemClickListener {
+public class RepeatSettingsActivity extends BaseActivity implements AdapterView.OnItemClickListener {
     public static final String REPEAT_DATE = "REPEAT_DATE";
     private static final String[] items = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
     private int repeatDate;
